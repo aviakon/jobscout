@@ -87,6 +87,12 @@
   <p class="run-summary">📊 בסריקה האחרונה: {{ su.raw_postings }} משרות נסרקו · {{ su.matches_kept }} התאמות ·
     מנוע: {{ "AI (Claude)" if su.engine == "llm" else "מקומי (ללא מפתח)" }}</p>
   {% endif %}
+  {% if has_aggregator %}
+  <p class="coverage-note ok">🌐 כיסוי מלא: לוחות החברות + אגרגטור משרות (כולל LinkedIn ו-Indeed).</p>
+  {% else %}
+  <p class="coverage-note">🔎 כרגע סורקים רק את לוחות המשרות של החברות עצמן. משרות מ-LinkedIn
+    ומ-Indeed דורשות מפתח <code>RAPIDAPI_KEY</code> חינמי, ובלעדיו הן לא נסרקות.</p>
+  {% endif %}
 </section>
 
 {% if preferences %}
@@ -184,7 +190,8 @@
           <strong>{{ m.job.company }}</strong>
           {% if m.job.location %}· {{ m.job.location }}{% endif %}
           {% if m.job.remote %}· {{ m.job.remote }}{% endif %}
-          <span class="source-tag">{{ m.job.source }}</span>
+          <span class="source-tag{{ ' source-board' if m.from_company_board else '' }}"
+                title="מקור המשרה">{{ '🏢' if m.from_company_board else '🌐' }} {{ m.source_label }}</span>
         </div>
         {% if m.fit_flags %}
         <div class="fit-badges">{% for f in m.fit_flags %}<span class="fit-badge">{{ f }}</span>{% endfor %}</div>

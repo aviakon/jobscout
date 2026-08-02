@@ -86,6 +86,9 @@ class Job(Base):
     description: Mapped[str] = mapped_column(Text, default="")
     url: Mapped[str] = mapped_column(String(1000), default="")
     source: Mapped[str] = mapped_column(String(50))  # comeet / greenhouse / lever / ashby / jsearch
+    # where the posting actually came from, for display: the ATS board name, or for
+    # aggregated results the original publisher (e.g. "LinkedIn", "Indeed", "Glassdoor")
+    source_detail: Mapped[str] = mapped_column(String(120), default="")
     remote: Mapped[str] = mapped_column(String(20), default="")  # remote / hybrid / onsite / ""
     posted_at: Mapped[str] = mapped_column(String(50), default="")
     first_seen: Mapped[datetime] = mapped_column(DateTime, default=utcnow)

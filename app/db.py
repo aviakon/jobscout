@@ -20,6 +20,7 @@ _ADDED_COLUMNS: list[tuple[str, str, str]] = [
     ("candidates", "preferences_json", "TEXT DEFAULT '{}'"),
     ("candidates", "public_id", "TEXT"),
     ("matches", "notified_at", "DATETIME"),
+    ("jobs", "source_detail", "TEXT DEFAULT ''"),
 ]
 
 

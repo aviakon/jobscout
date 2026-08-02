@@ -18,6 +18,9 @@ class JobPosting:
     url: str = ""
     remote: str = ""      # remote / hybrid / onsite / ""
     posted_at: str = ""   # ISO date string when known
+    # Where the posting actually came from, for display. For a company ATS board this
+    # is the board name; for an aggregator it's the original publisher (e.g. "LinkedIn").
+    source_detail: str = ""
     extra: dict = field(default_factory=dict)
 
     @property

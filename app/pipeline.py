@@ -59,6 +59,7 @@ def _upsert_job(session: Session, p: JobPosting) -> Job:
     job.description = p.description
     job.url = p.url
     job.source = p.source
+    job.source_detail = getattr(p, "source_detail", "") or ""
     job.remote = p.remote
     job.posted_at = p.posted_at
     from app.models import utcnow

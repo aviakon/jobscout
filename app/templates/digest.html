@@ -39,7 +39,7 @@
         <div class="match-meta">
           <strong>{{ m.job.company }}</strong>
           {% if m.job.location %}· {{ m.job.location }}{% endif %}
-          <span class="source-tag">{{ m.job.source }}</span>
+          <span class="source-tag">{{ m.job.source_detail or m.job.source }}</span>
         </div>
         {% if m.verdict %}<p class="verdict">{{ m.verdict }}</p>{% endif %}
         {% if m.why %}<ul class="why">{% for w in m.why %}<li>✅ {{ w }}</li>{% endfor %}</ul>{% endif %}

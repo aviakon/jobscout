@@ -258,6 +258,8 @@ def candidate_view(token: str, request: Request, session: Session = Depends(get_
     prefs = candidate.preferences
     for m in matches:
         m.fit_flags = prefs_mod.fit_flags(m.job, prefs)
+        m.source_label = prefs_mod.source_label(m.job)
+        m.from_company_board = prefs_mod.source_is_company_board(m.job)
 
     return templates.TemplateResponse(
         request,
@@ -268,6 +270,8 @@ def candidate_view(token: str, request: Request, session: Session = Depends(get_
             "matches": matches,
             "all_skills": list(skills_db.SKILLS.keys()),
             "preferences": prefs,
+            # LinkedIn/Indeed coverage comes via the JSearch aggregator, which needs a key
+            "has_aggregator": bool(config.RAPIDAPI_KEY),
         },
     )
 

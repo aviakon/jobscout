@@ -17,7 +17,7 @@ log = logging.getLogger(__name__)
 class JSearchConnector(Connector):
     name = "jsearch"
 
-    def __init__(self, api_key: str | None = None, pages: int = 2):
+    def __init__(self, api_key: str | None = None, pages: int = 3):
         self.api_key = api_key or config.RAPIDAPI_KEY
         self.pages = pages
 
@@ -45,6 +45,9 @@ class JSearchConnector(Connector):
                 for j in r.json().get("data", []):
                     city = j.get("job_city") or ""
                     country = j.get("job_country") or ""
+                    # the publisher is the site the posting actually came from
+                    # (LinkedIn, Indeed, Glassdoor, AllJobs, ...) — worth showing
+                    publisher = j.get("job_publisher") or ""
                     out.append(
                         JobPosting(
                             title=j.get("job_title", ""),
@@ -55,7 +58,8 @@ class JSearchConnector(Connector):
                             url=j.get("job_apply_link") or j.get("job_google_link", ""),
                             remote="remote" if j.get("job_is_remote") else "",
                             posted_at=(j.get("job_posted_at_datetime_utc") or "")[:10],
-                            extra={"publisher": j.get("job_publisher", "")},
+                            source_detail=publisher,
+                            extra={"publisher": publisher},
                         )
                     )
             except Exception as e:

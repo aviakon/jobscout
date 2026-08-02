@@ -12,6 +12,7 @@ from app.sources.comeet import ComeetConnector
 from app.sources.greenhouse import GreenhouseConnector
 from app.sources.jsearch import JSearchConnector
 from app.sources.lever import LeverConnector
+from app.sources.smartrecruiters import SmartRecruitersConnector
 
 log = logging.getLogger(__name__)
 
@@ -35,6 +36,8 @@ def build_connectors() -> list[Connector]:
         connectors.append(AshbyConnector(cfg["ashby"]))
     if cfg.get("comeet"):
         connectors.append(ComeetConnector(cfg["comeet"]))
+    if cfg.get("smartrecruiters"):
+        connectors.append(SmartRecruitersConnector(cfg["smartrecruiters"]))
 
     # JSearch is query-driven and always included; it self-skips without a key.
     connectors.append(JSearchConnector())

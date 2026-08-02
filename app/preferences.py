@@ -108,6 +108,33 @@ def preference_boost(job, prefs: dict) -> float:
     return boost
 
 
+# Friendly Hebrew names for where a posting came from, shown on match cards.
+_SOURCE_LABELS = {
+    "greenhouse": "לוח החברה (Greenhouse)",
+    "lever": "לוח החברה (Lever)",
+    "ashby": "לוח החברה (Ashby)",
+    "comeet": "לוח החברה (Comeet)",
+    "smartrecruiters": "לוח החברה (SmartRecruiters)",
+    "jsearch": "אגרגטור משרות",
+}
+
+
+def source_label(job) -> str:
+    """Human-readable origin. For aggregated results this is the site the posting
+    actually came from (LinkedIn, Indeed, ...) rather than the aggregator itself."""
+    detail = (getattr(job, "source_detail", "") or "").strip()
+    source = (getattr(job, "source", "") or "").strip()
+    if detail:
+        return detail
+    return _SOURCE_LABELS.get(source, source or "לא ידוע")
+
+
+def source_is_company_board(job) -> bool:
+    return (getattr(job, "source", "") or "") in {
+        "greenhouse", "lever", "ashby", "comeet", "smartrecruiters"
+    }
+
+
 _ISRAEL_HINTS = ["israel", "ישראל"]
 _REMOTE_HINTS = ["remote", "anywhere", "work from home", "wfh", "מהבית", "מרחוק", "עבודה מהבית", "distributed"]
 # extra Israeli places beyond the region map

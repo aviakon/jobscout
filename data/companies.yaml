@@ -62,6 +62,14 @@ ashby:
   - { board: finout, company: "Finout" }
   - { board: oligo, company: "Oligo Security" }
 
+# SmartRecruiters. NOTE: this API returns 200 with 0 results for any slug, so only
+# add boards after confirming they actually return postings.
+smartrecruiters:
+  - { board: armis, company: "Armis" }
+  - { board: hibob, company: "HiBob" }
+  # NOTE: fiverr's board was tried and removed: it returns marketplace gigs
+  # ("HVAC Subcontractor"), not Fiverr company roles.
+
 # Comeet boards need a public uid+token pair (from the careers page).
 # Left empty by default — add companies you care about.
 comeet: []

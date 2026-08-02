@@ -179,9 +179,11 @@ button:hover { filter: brightness(1.1); }
 .match-body h3 a:hover { color: var(--accent); }
 .match-meta { color: var(--muted); font-size: 0.9rem; margin-bottom: 0.5rem; }
 .source-tag {
-  background: #0006; border-radius: 5px; padding: 0.05rem 0.4rem; font-size: 0.75rem;
-  margin-inline-start: 0.4rem; text-transform: uppercase;
+  background: #0006; border-radius: 5px; padding: 0.05rem 0.45rem; font-size: 0.75rem;
+  margin-inline-start: 0.4rem; white-space: nowrap;
 }
+/* jobs taken straight from a company's own board are the "hidden" ones worth flagging */
+.source-tag.source-board { background: var(--accent2-soft); color: var(--accent2); }
 .verdict { font-style: italic; margin: 0.3rem 0; }
 .why, .gaps { margin: 0.3rem 0; padding-inline-start: 1.1rem; list-style: none; }
 .why li, .gaps li { font-size: 0.9rem; margin: 0.15rem 0; }
@@ -190,6 +192,12 @@ button:hover { filter: brightness(1.1); }
 .status-label { color: var(--muted); font-size: 0.8rem; }
 
 .run-summary { margin-top: 0.8rem; font-size: 0.9rem; color: var(--accent2); }
+.coverage-note {
+  margin-top: 0.4rem; font-size: 0.85rem; color: var(--muted);
+  background: var(--card2); border: 1px solid var(--border); border-radius: 8px;
+  padding: 0.5rem 0.8rem;
+}
+.coverage-note.ok { color: var(--accent2); border-color: var(--accent2); background: var(--accent2-soft); }
 .gap-panel .gap-bars { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.8rem; }
 .gap-row { display: flex; align-items: center; gap: 0.7rem; }
 .gap-name { flex: 0 0 160px; font-size: 0.9rem; }
