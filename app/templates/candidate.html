@@ -84,8 +84,13 @@
   <p class="muted small">החיפוש עשוי לקחת דקה. סורק מקורות רבים ומדרג כל משרה מול הפרופיל שלך.</p>
   {% if candidate.last_summary %}
   {% set su = candidate.last_summary %}
+  {% if su.raw_postings == 0 %}
+  <p class="coverage-note warn">⚠️ לא הצלחנו להגיע למקורות המשרות בסריקה האחרונה, ולכן לא נסרקה אף משרה.
+    זו תקלה אצלנו ולא בפרופיל שלך. נסו לחפש שוב בעוד כמה רגעים.</p>
+  {% else %}
   <p class="run-summary">📊 בסריקה האחרונה: {{ su.raw_postings }} משרות נסרקו · {{ su.matches_kept }} התאמות ·
     מנוע: {{ "AI (Claude)" if su.engine == "llm" else "מקומי (ללא מפתח)" }}</p>
+  {% endif %}
   {% endif %}
   {% if has_aggregator %}
   <p class="coverage-note ok">🌐 כיסוי מלא: לוחות החברות + אגרגטור משרות (כולל LinkedIn ו-Indeed).</p>

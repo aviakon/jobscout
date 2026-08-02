@@ -1,4 +1,4 @@
-"""Build the set of active connectors from data/companies.yaml."""
+"""Build the set of active connectors from the packaged companies.yaml."""
 from __future__ import annotations
 
 import logging
@@ -17,11 +17,23 @@ from app.sources.smartrecruiters import SmartRecruitersConnector
 log = logging.getLogger(__name__)
 
 
+ATS_KEYS = ("greenhouse", "lever", "ashby", "comeet", "smartrecruiters")
+
+
 def load_companies() -> dict:
     if not config.COMPANIES_FILE.exists():
+        # Without this file there are no company boards to scan, so every search
+        # comes back empty. Loud on purpose — it is otherwise invisible.
+        log.error("companies file missing at %s — no job boards to scan", config.COMPANIES_FILE)
         return {}
     with open(config.COMPANIES_FILE, encoding="utf-8") as f:
         return yaml.safe_load(f) or {}
+
+
+def board_count() -> int:
+    """How many company job boards are configured across all ATS sources."""
+    cfg = load_companies()
+    return sum(len(cfg.get(k) or []) for k in ATS_KEYS)
 
 
 def build_connectors() -> list[Connector]:
@@ -38,6 +50,12 @@ def build_connectors() -> list[Connector]:
         connectors.append(ComeetConnector(cfg["comeet"]))
     if cfg.get("smartrecruiters"):
         connectors.append(SmartRecruitersConnector(cfg["smartrecruiters"]))
+
+    if not connectors:
+        log.error(
+            "no ATS boards configured (companies file: %s) — searches will return nothing",
+            config.COMPANIES_FILE,
+        )
 
     # JSearch is query-driven and always included; it self-skips without a key.
     connectors.append(JSearchConnector())

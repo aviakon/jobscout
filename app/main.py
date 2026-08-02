@@ -53,6 +53,33 @@ RATE_LIMIT_HTML = """<!DOCTYPE html><html lang="he" dir="rtl"><head><meta charse
 @app.on_event("startup")
 def _startup() -> None:
     init_db()
+    from app.sources.registry import board_count
+
+    boards = board_count()
+    if boards:
+        logging.info("job sources ready: %d company boards", boards)
+    else:
+        logging.error(
+            "NO job sources configured — every search will return 0 jobs. "
+            "Expected companies.yaml at %s",
+            config.COMPANIES_FILE,
+        )
+
+
+@app.get("/healthz")
+def healthz():
+    """Liveness + a quick answer to 'why did the search find nothing?'."""
+    from app.sources.registry import board_count
+
+    boards = board_count()
+    return {
+        "ok": boards > 0,
+        "company_boards": boards,
+        "companies_file": str(config.COMPANIES_FILE),
+        "companies_file_found": config.COMPANIES_FILE.exists(),
+        "aggregator": bool(config.RAPIDAPI_KEY),
+        "engine": "llm" if config.ANTHROPIC_API_KEY else "heuristic",
+    }
 
 
 # --- small helpers ------------------------------------------------------------

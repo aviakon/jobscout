@@ -25,11 +25,29 @@ DIGEST_FROM: str = os.getenv("DIGEST_FROM", "") or SMTP_USER
 def email_configured() -> bool:
     return bool(SMTP_HOST and SMTP_USER and SMTP_PASS and DIGEST_TO)
 
+# `data/` holds *mutable state only* (DB, uploads, digests). In production it is a
+# mounted Railway volume, which overlays the directory and hides anything the image
+# shipped inside it — so files that ship with the code live in `app/resources/`
+# instead, where no volume can shadow them.
 DATA_DIR = BASE_DIR / "data"
+RESOURCES_DIR = BASE_DIR / "app" / "resources"
 UPLOAD_DIR = DATA_DIR / "uploads"
 DIGEST_DIR = DATA_DIR / "digests"
 DB_PATH = DATA_DIR / "jobscout.db"
-COMPANIES_FILE = DATA_DIR / "companies.yaml"
+
+SAMPLE_RESUME = RESOURCES_DIR / "sample_resume.txt"
+
+
+def _companies_file() -> Path:
+    """Packaged company list, with an optional local override."""
+    env = os.getenv("COMPANIES_FILE")
+    if env:
+        return Path(env)
+    local = DATA_DIR / "companies.yaml"   # hand-edited local list wins, if present
+    return local if local.exists() else RESOURCES_DIR / "companies.yaml"
+
+
+COMPANIES_FILE = _companies_file()
 
 # Matching pipeline knobs
 PREFILTER_TOP_N = 90          # jobs scored (wider pool so level/location filters still leave enough)

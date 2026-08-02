@@ -198,6 +198,7 @@ button:hover { filter: brightness(1.1); }
   padding: 0.5rem 0.8rem;
 }
 .coverage-note.ok { color: var(--accent2); border-color: var(--accent2); background: var(--accent2-soft); }
+.coverage-note.warn { color: #ffcf8f; border-color: #b8752e; background: rgba(184, 117, 46, 0.12); }
 .gap-panel .gap-bars { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.8rem; }
 .gap-row { display: flex; align-items: center; gap: 0.7rem; }
 .gap-name { flex: 0 0 160px; font-size: 0.9rem; }

@@ -21,7 +21,9 @@ Web dashboard: ranked matches, reasons, gap analysis, save/applied tracking
 - **ATS public APIs** (free, no key): Greenhouse, Lever, Ashby, Comeet — the "hidden jobs" edge.
 - **JSearch** (RapidAPI, free tier): aggregates Google for Jobs (LinkedIn, Indeed, AllJobs, Drushim).
 
-Add target companies in [`data/companies.yaml`](data/companies.yaml).
+Add target companies in [`app/resources/companies.yaml`](app/resources/companies.yaml).
+(Files that ship with the code live in `app/resources/`; `data/` holds mutable state only,
+because in production it is a mounted volume that would hide anything the image put there.)
 
 ## Two modes — works with **zero setup**
 
@@ -49,7 +51,7 @@ cp .env.example .env      # then fill in ANTHROPIC_API_KEY (and optionally RAPID
 ## Try it immediately (offline, no keys)
 
 ```bash
-python cli.py data/sample_resume.txt --location Israel
+python cli.py app/resources/sample_resume.txt --location Israel
 ```
 
 ## The web experience
