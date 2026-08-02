@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}בואו נתחיל — JobScout{% endblock %}
+{% block title %}בואו נתחיל: JobScout{% endblock %}
 {% block main_class %}onb{% endblock %}
 
 {% block content %}
@@ -55,13 +55,13 @@
         <div class="dz-file" id="photo-file" hidden></div>
       </div>
       <input type="file" name="photo" id="photo-input" accept="image/*" hidden>
-      <p class="method-note">📸 תמונה ברורה עובדת הכי טוב. לדיוק מרבי — עדיף קובץ PDF/DOCX או הדבקת טקסט.</p>
+      <p class="method-note">📸 תמונה ברורה עובדת הכי טוב. לדיוק מרבי עדיף קובץ PDF/DOCX או הדבקת טקסט.</p>
     </div>
 
     <div class="method-panel" data-panel="link">
       <input type="url" class="link-input" name="resume_url" id="resume_url"
-             placeholder="https://— קישור לאתר אישי או קובץ PDF ציבורי">
-      <p class="method-note">קישור לאתר אישי / PDF ציבורי. לא נתמך ייבוא מ-LinkedIn.</p>
+             placeholder="קישור לאתר אישי או PDF ציבורי, לדוגמה https://example.com">
+      <p class="method-note">קישור לאתר אישי או PDF ציבורי. לא ניתן לייבא מתוך LinkedIn.</p>
     </div>
 
     <div class="wizard-actions">
@@ -82,7 +82,7 @@
                value="{{ p.salary_min or '' }}">
         <span class="unit">₪ ומעלה</span>
       </div>
-      <p class="method-note">משמש לדירוג בלבד — משרות ללא שכר מפורסם עדיין יוצגו.</p>
+      <p class="method-note">משמש לדירוג בלבד. משרות ללא שכר מפורסם עדיין יוצגו.</p>
     </div>
 
     <div class="pref-group">
@@ -133,7 +133,7 @@
     <div class="pref-group">
       <label class="lbl">תפקידים שמעניינים אתכם</label>
       <div class="roles-box" id="roles-box">
-        <input type="text" id="role-input" placeholder="למשל Backend — הקלידו ו-Enter" autocomplete="off">
+        <input type="text" id="role-input" placeholder="למשל Backend, ולחצו Enter" autocomplete="off">
       </div>
       <input type="hidden" name="roles" id="roles-hidden" value="{{ (p.roles or [])|join(',') }}">
     </div>

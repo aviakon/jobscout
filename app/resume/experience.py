@@ -49,6 +49,14 @@ def _has(text_lc: str, needles: list[str]) -> bool:
     return any(n in text_lc for n in needles)
 
 
+def _clean_title(title: str) -> str:
+    """Replace mid-string dashes in a displayed title with a comma, so a
+    resume line like 'Unit 8200 - Backend Developer' reads as
+    'Unit 8200, Backend Developer' without altering its meaning."""
+    title = re.sub(r"\s*[-–—]\s*", ", ", title)
+    return re.sub(r"\s+", " ", title).strip(" ,")
+
+
 def parse_experiences(text: str) -> list[dict]:
     """Return dated work-history entries, most recent first."""
     lines = text.splitlines()
@@ -71,7 +79,7 @@ def parse_experiences(text: str) -> list[dict]:
         ctx = _lc(f"{title} {body}")
 
         entries.append({
-            "title": title[:80],
+            "title": _clean_title(title)[:80],
             "start": start,
             "end": end,
             "years": years,

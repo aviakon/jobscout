@@ -10,7 +10,7 @@ document.addEventListener("click", async (e) => {
     copyBtn.textContent = "✓ הועתק";
     setTimeout(() => (copyBtn.textContent = original), 1500);
   } catch {
-    alert("לא ניתן להעתיק אוטומטית — סמן והעתק ידנית.");
+    alert("לא ניתן להעתיק אוטומטית. סמן והעתק ידנית.");
   }
 });
 
@@ -452,7 +452,7 @@ document.addEventListener("submit", (e) => {
   overlay.innerHTML = `<div class="loading-box">
       <div class="spinner"></div>
       <p>${form.dataset.loading}</p>
-      <p class="loading-sub">זה יכול לקחת עד דקה — לא לסגור את החלון.</p>
+      <p class="loading-sub">זה יכול לקחת עד דקה. לא לסגור את החלון.</p>
     </div>`;
   document.body.appendChild(overlay);
 });

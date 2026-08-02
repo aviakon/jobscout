@@ -107,7 +107,7 @@ def _verdict(score: float) -> str:
     if score >= 60:
         return "Strong match worth a look."
     if score >= 40:
-        return "Partial match — some overlap."
+        return "Partial match, some overlap."
     return "Weak match."
 
 

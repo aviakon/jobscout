@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}{{ candidate.name or "מועמד" }} — JobScout{% endblock %}
+{% block title %}{{ candidate.name or "מועמד" }}: JobScout{% endblock %}
 {% block content %}
 
 <section class="card profile">
@@ -19,7 +19,7 @@
       <ul class="skill-suggest" id="skill-suggest" hidden></ul>
     </div>
   </div>
-  <p class="muted small chips-hint">💡 לחץ על כישור כדי לדרג שנות ניסיון, או הקלד למעלה כדי להוסיף כישור — זה משפר את דיוק ההתאמות.</p>
+  <p class="muted small chips-hint">💡 לחץ על כישור כדי לדרג שנות ניסיון, או הקלד למעלה כדי להוסיף כישור. זה משפר את דיוק ההתאמות.</p>
   <script type="application/json" id="all-skills-data">{{ all_skills|tojson }}</script>
 
   <!-- experience gauge modal -->
@@ -57,7 +57,7 @@
     {% for e in profile.experiences %}
     <div class="exp-row">
       <span class="exp-role">{{ e.title }}{% if e.is_military %}<span class="exp-mil">שירות צבאי</span>{% endif %}</span>
-      <span class="exp-dates">{{ e.start }}–{{ e.end }}</span>
+      <span class="exp-dates">{{ e.start }} עד {{ e.end }}</span>
       <span class="exp-years">{{ e.years|int }} שנים</span>
     </div>
     {% endfor %}
@@ -81,7 +81,7 @@
     <label>מיקום: <input type="text" name="location" value="Israel"></label>
     <button type="submit">🔎 חפש משרות עכשיו</button>
   </form>
-  <p class="muted small">החיפוש עשוי לקחת דקה — סורק מקורות רבים ומדרג כל משרה מול הפרופיל שלך.</p>
+  <p class="muted small">החיפוש עשוי לקחת דקה. סורק מקורות רבים ומדרג כל משרה מול הפרופיל שלך.</p>
   {% if candidate.last_summary %}
   {% set su = candidate.last_summary %}
   <p class="run-summary">📊 בסריקה האחרונה: {{ su.raw_postings }} משרות נסרקו · {{ su.matches_kept }} התאמות ·
@@ -123,7 +123,7 @@
 {% if candidate.gap_analysis %}
 <section class="card gap-panel">
   <h2>💡 ניתוח פערים</h2>
-  <p class="muted">כישורים שחוזרים בהרבה מהמשרות המתאימות אך חסרים בקורות החיים שלך — שווה להוסיף או ללמוד:</p>
+  <p class="muted">כישורים שחוזרים בהרבה מהמשרות המתאימות אך חסרים בקורות החיים שלך. שווה להוסיף או ללמוד:</p>
   <div class="gap-bars">
     {% for g in candidate.gap_analysis %}
     <div class="gap-row">

@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}מכתב מקדים — {{ job.title }}{% endblock %}
+{% block title %}מכתב מקדים ל{{ job.title }}{% endblock %}
 {% block content %}
 
 <section class="card">
@@ -26,6 +26,6 @@
   <ul class="tweaks">
     {% for t in result.tweaks %}<li>{{ t }}</li>{% endfor %}
   </ul>
-  <p class="muted small">המכתב נוצר אוטומטית — כדאי לעבור עליו, לוודא שהפרטים נכונים ולהוסיף נגיעה אישית לפני שליחה.</p>
+  <p class="muted small">המכתב נוצר אוטומטית. כדאי לעבור עליו, לוודא שהפרטים נכונים ולהוסיף נגיעה אישית לפני שליחה.</p>
 </section>
 {% endblock %}

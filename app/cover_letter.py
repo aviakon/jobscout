@@ -47,7 +47,7 @@ def _letter_en(profile: dict, job: Job, matching: list[str]) -> str:
     )
     return f"""Dear {job.company} Hiring Team,
 
-I'm writing to apply for the {job.title} position at {job.company}. As a {seniority} {headline} with {years_txt}experience, I was excited to see this opening — it aligns closely with my background.
+I'm writing to apply for the {job.title} position at {job.company}. As a {seniority} {headline} with {years_txt}experience, I was excited to see this opening. It aligns closely with my background.
 
 My strongest overlap with what you're looking for is in {skills_txt}.{extra_line} Across my roles I've focused on building reliable, well-architected systems and delivering measurable results, and I'm confident I could do the same for your team.
 
@@ -65,11 +65,11 @@ def _letter_he(profile: dict, job: Job, matching: list[str]) -> str:
     skills_txt = ", ".join(matching[:4]) if matching else "בכישורים הנדרשים למשרה"
     return f"""לכבוד צוות הגיוס של {job.company},
 
-אני פונה בעניין משרת {job.title} ב-{job.company}. כ{headline} {years_txt}התלהבתי לראות את המשרה — היא מתאימה מאוד לרקע המקצועי שלי.
+אני פונה בעניין משרת {job.title} אצל {job.company}. כ{headline} {years_txt}התלהבתי לראות את המשרה. היא מתאימה מאוד לרקע המקצועי שלי.
 
 החפיפה החזקה ביותר שלי עם הדרישות היא ב{skills_txt}. לאורך התפקידים שלי התמקדתי בבניית מערכות אמינות ובהשגת תוצאות מדידות, ואני משוכנע/ת שאוכל לתרום זאת גם לצוות שלכם.
 
-אשמח להזדמנות לשוחח על האופן שבו הניסיון שלי יכול לתרום ל-{job.company}. תודה על זמנכם.
+אשמח להזדמנות לשוחח על האופן שבו הניסיון שלי יכול לתרום לחברת {job.company}. תודה על זמנכם.
 
 בברכה,
 {name}"""
@@ -82,8 +82,8 @@ def _tweaks_en(profile: dict, job: Job, matching: list[str], gaps: list[str]) ->
     if job.title and job.title.lower() not in (profile.get("headline") or "").lower():
         tips.append(f"Mirror the exact job title \"{job.title}\" in your headline/summary for ATS keyword match.")
     if gaps:
-        tips.append(f"The posting mentions {', '.join(gaps)} — if you have any exposure, add it explicitly.")
-    tips.append("Quantify 2–3 achievements with concrete metrics (%, scale, revenue, latency).")
+        tips.append(f"The posting mentions {', '.join(gaps)}. If you have any exposure, add it explicitly.")
+    tips.append("Quantify 2 to 3 achievements with concrete metrics (%, scale, revenue, latency).")
     tips.append(f"Add one line tailored to {job.company}'s domain to show you researched them.")
     return tips
 
@@ -95,8 +95,8 @@ def _tweaks_he(profile: dict, job: Job, matching: list[str], gaps: list[str]) ->
     if job.title:
         tips.append(f"שלבו את שם המשרה המדויק \"{job.title}\" בכותרת/תקציר להתאמת מילות מפתח (ATS).")
     if gaps:
-        tips.append(f"המשרה מזכירה {', '.join(gaps)} — אם יש לכם היכרות, ציינו זאת במפורש.")
-    tips.append("כמתו 2–3 הישגים עם מספרים קונקרטיים (אחוזים, היקף, הכנסה, ביצועים).")
+        tips.append(f"המשרה מזכירה {', '.join(gaps)}. אם יש לכם היכרות, ציינו זאת במפורש.")
+    tips.append("כמתו 2 עד 3 הישגים עם מספרים קונקרטיים (אחוזים, היקף, הכנסה, ביצועים).")
     return tips
 
 
@@ -105,7 +105,8 @@ def _tweaks_he(profile: dict, job: Job, matching: list[str], gaps: list[str]) ->
 _LLM_SYSTEM = """You are an expert career coach. Given a candidate profile and a job
 posting, write (1) a concise, specific cover letter (max ~200 words, no clichés,
 no invented facts) and (2) 3-5 concrete resume-tailoring tips. Write in the job's
-language (Hebrew or English). Return ONLY JSON: {"letter": string, "tweaks": [string]}."""
+language (Hebrew or English). Do not use em-dashes or en-dashes; use periods or
+commas instead. Return ONLY JSON: {"letter": string, "tweaks": [string]}."""
 
 
 def _generate_llm(profile: dict, job: Job) -> dict | None:

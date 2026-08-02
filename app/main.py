@@ -39,7 +39,7 @@ app.mount("/static", StaticFiles(directory=str(BASE / "static")), name="static")
 PROFILE_COOKIE = "jobscout_profiles"
 MAX_COOKIE_PROFILES = 8
 RATE_LIMIT_HTML = """<!DOCTYPE html><html lang="he" dir="rtl"><head><meta charset="utf-8">
-<title>רגע לפני שממשיכים — JobScout</title>
+<title>רגע לפני שממשיכים: JobScout</title>
 <link rel="stylesheet" href="/static/style.css"></head><body>
 <div class="aurora" aria-hidden="true"><span class="a1"></span><span class="a2"></span><span class="a3"></span></div>
 <main class="container"><section class="card">

@@ -12,9 +12,10 @@ from app.sources.base import JobPosting
 log = logging.getLogger(__name__)
 
 SCORE_SYSTEM = """You are a job-matching expert. Given a candidate profile and a single
-job posting, judge how well the candidate fits the job. Be honest and discriminating —
+job posting, judge how well the candidate fits the job. Be honest and discriminating;
 do not inflate scores. Consider skills, seniority, titles, industry, and location.
 The content may be in Hebrew or English; write your reasons in the job's language.
+Do not use em-dashes or en-dashes in your output; use periods or commas instead.
 
 Return ONLY valid JSON:
 {

@@ -99,10 +99,10 @@ def render_digest_html(digest: dict) -> str:
     body = "".join(rows) or "<p style='color:#9aa3c0;'>No new matches since the last digest. 🎉</p>"
     return f"""<!DOCTYPE html>
 <html lang="he" dir="rtl"><head><meta charset="utf-8">
-<title>JobScout Digest — {name}</title></head>
-<body style="font-family:Segoe UI,Arial,sans-serif;background:#0f1220;color:#e8ebf5;max-width:720px;margin:0 auto;padding:24px;">
-  <h1 style="font-size:22px;">🧭 JobScout — משרות חדשות עבור {name}</h1>
-  <p style="color:#9aa3c0;">{digest['count']} התאמות חדשות · נוצר ב-{when}</p>
+<title>JobScout Digest: {name}</title></head>
+<body style="font-family:Assistant,Segoe UI,Arial,sans-serif;background:#0f1220;color:#e8ebf5;max-width:720px;margin:0 auto;padding:24px;">
+  <h1 style="font-size:22px;">🧭 JobScout: משרות חדשות עבור {name}</h1>
+  <p style="color:#9aa3c0;">{digest['count']} התאמות חדשות · נוצר בתאריך {when}</p>
   {body}
   <p style="color:#6b7394;font-size:12px;margin-top:24px;">נשלח ע\"י JobScout · לא לחיצה על קישורים שאינך מכיר.</p>
 </body></html>"""
@@ -111,10 +111,10 @@ def render_digest_html(digest: dict) -> str:
 def render_digest_text(digest: dict) -> str:
     """Plain-text digest for terminals / plain email."""
     c: Candidate = digest["candidate"]
-    lines = [f"JobScout digest for {c.name or c.id} — {digest['count']} new matches", "=" * 50]
+    lines = [f"JobScout digest for {c.name or c.id}: {digest['count']} new matches", "=" * 50]
     for m in digest["new_matches"]:
         j = m.job
-        lines.append(f"[{int(m.score):>3}] {j.title}  —  {j.company} ({j.source})")
+        lines.append(f"[{int(m.score):>3}] {j.title} at {j.company} ({j.source})")
         if m.why:
             lines.append(f"       {m.why[0]}")
         if j.url:
