@@ -1,0 +1,11 @@
+.env
+__pycache__/
+*.pyc
+data/jobscout.db
+data/uploads/
+data/digests/
+.pytest_cache/
+.venv/
+venv/
+*.egg-info/
+.DS_Store

@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}מכתב מקדים — {{ job.title }}{% endblock %}
+{% block content %}
+
+<section class="card">
+  <div class="digest-head">
+    <div>
+      <h1>✍️ מכתב מקדים</h1>
+      <p class="muted">{{ job.title }} · {{ job.company }}
+        · מנוע: {{ "AI (Claude)" if result.engine == "llm" else "מקומי" }}</p>
+    </div>
+    <a href="/candidate/{{ candidate.public_id }}" class="back-link">← חזרה</a>
+  </div>
+</section>
+
+<section class="card">
+  <div class="cl-head">
+    <h2>המכתב</h2>
+    <button type="button" class="copy-btn" data-copy-target="cover-text">📋 העתק</button>
+  </div>
+  <pre id="cover-text" class="cover-text" {% if result.lang == 'en' %}dir="ltr"{% endif %}>{{ result.letter }}</pre>
+</section>
+
+<section class="card">
+  <h2>💡 שיפורים לקורות החיים למשרה הזו</h2>
+  <ul class="tweaks">
+    {% for t in result.tweaks %}<li>{{ t }}</li>{% endfor %}
+  </ul>
+  <p class="muted small">המכתב נוצר אוטומטית — כדאי לעבור עליו, לוודא שהפרטים נכונים ולהוסיף נגיעה אישית לפני שליחה.</p>
+</section>
+{% endblock %}

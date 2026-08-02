@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}JobScout{% endblock %}</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="{% block body_class %}{% endblock %}">
+  <div class="aurora" aria-hidden="true"><span class="a1"></span><span class="a2"></span><span class="a3"></span></div>
+  {% block topbar %}
+  <header class="topbar">
+    <a href="/" class="brand">🧭 JobScout</a>
+    <span class="tagline">מוצא לך את המשרות שאחרים מפספסים</span>
+  </header>
+  {% endblock %}
+  <main class="{% block main_class %}container{% endblock %}">
+    {% block content %}{% endblock %}
+  </main>
+  <script src="/static/app.js"></script>
+</body>
+</html>

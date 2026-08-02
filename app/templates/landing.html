@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}JobScout — מוצאים את העבודה שהכי מתאימה לך{% endblock %}
+{% block body_class %}landing{% endblock %}
+{% block main_class %}full{% endblock %}
+
+{% block topbar %}
+<header class="topbar minimal">
+  <a href="/" class="brand">🧭 JobScout</a>
+</header>
+{% endblock %}
+
+{% block content %}
+<section class="hero-wrap">
+  <span class="eyebrow">AI · מנוע התאמת משרות</span>
+  <div class="hero-rotator" id="rotator" aria-live="polite">
+    <h1 class="hero-line on">מוצאים את העבודה שהכי מתאימה לך.</h1>
+    <h1 class="hero-line">מתוך אלפי משרות — יודעים איפה שווה.</h1>
+    <h1 class="hero-line">העבודה הנכונה, בלי לחפש שעות.</h1>
+    <h1 class="hero-line">אלגוריתם שמבין אותך — לא רק מילות מפתח.</h1>
+  </div>
+  <p class="hero-sub">מעלים קורות חיים, עונים על כמה שאלות, ו-JobScout סורק מאות משרות ממקורות רבים,
+    מדרג כל אחת מול הפרופיל שלך, ומראה בדיוק למה אתם מתאימים — כולל משרות שלא מגיעות ל-LinkedIn.</p>
+  <div class="cta-row">
+    <a href="/start" class="btn-primary">בואו נתחיל →</a>
+    {% if candidates %}<a href="#returning" class="btn-ghost">כבר יש לי פרופיל</a>
+    {% else %}<a href="/start" class="btn-ghost">איך זה עובד</a>{% endif %}
+  </div>
+</section>
+
+<section class="features">
+  <div class="card feature"><span class="fi">🕵️</span><h3>משרות נסתרות</h3>
+    <p>מושכים משרות ישירות מלוחות החברות (Greenhouse, Lever, Ashby) — לא רק מה שכולם רואים.</p></div>
+  <div class="card feature"><span class="fi">🎯</span><h3>התאמה עם הסבר</h3>
+    <p>כל משרה מקבלת ציון 0–100 עם נימוק: למה אתם מתאימים ומה חסר.</p></div>
+  <div class="card feature"><span class="fi">📬</span><h3>דיג'סט יומי</h3>
+    <p>סריקה יומית אוטומטית שמציגה רק משרות חדשות שמתאימות לכם.</p></div>
+  <div class="card feature"><span class="fi">✍️</span><h3>מכתב מקדים</h3>
+    <p>מכתב מותאם אישית לכל משרה + טיפים לשיפור קורות החיים.</p></div>
+</section>
+
+{% if candidates %}
+<section class="returning" id="returning">
+  <h2>המשך מהמקום שעצרת</h2>
+  <div class="ret-grid">
+    {% for c in candidates %}
+    <a class="ret-card" href="/candidate/{{ c.public_id }}">
+      <span class="rn">{{ c.name or c.resume_filename or "מועמד" }}</span>
+      <span class="rm">{{ c.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+{% endblock %}

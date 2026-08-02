@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+{% block title %}בואו נתחיל — JobScout{% endblock %}
+{% block main_class %}onb{% endblock %}
+
+{% block content %}
+{% if error %}
+<div class="onb-error">⚠️ {{ error }}</div>
+{% endif %}
+
+<div class="onb-head">
+  <h1>{{ "עריכת העדפות" if candidate else "בואו נמצא לך עבודה" }}</h1>
+  <p class="muted">{{ "עדכנו את ההעדפות ונריץ חיפוש מחדש." if candidate
+     else "כמה שלבים קצרים ואנחנו סורקים את השוק בשבילכם." }}</p>
+</div>
+
+<div class="steps-nav" {% if candidate %}hidden{% endif %}>
+  <span class="step-dot active" data-dot="1"><span class="num">1</span> קורות חיים</span>
+  <span class="step-sep"></span>
+  <span class="step-dot" data-dot="2"><span class="num">2</span> העדפות</span>
+</div>
+
+<form id="onboard-form" action="/onboard" method="post" enctype="multipart/form-data"
+      data-loading="סורקים מאות משרות ומדרגים אותן מול הפרופיל שלך…">
+  <input type="hidden" name="resume_method" id="resume_method" value="file">
+  {% if candidate %}<input type="hidden" name="candidate_id" value="{{ candidate.public_id }}">{% endif %}
+
+  {% if not candidate %}
+  <!-- STEP 1: RESUME -->
+  <section class="card wizard-step active" data-step="1">
+    <div class="method-tabs">
+      <button type="button" class="method-tab active" data-method="file">📄 קובץ</button>
+      <button type="button" class="method-tab" data-method="text">📝 טקסט</button>
+      <button type="button" class="method-tab" data-method="photo">📷 תמונה</button>
+      <button type="button" class="method-tab" data-method="link">🔗 קישור</button>
+    </div>
+
+    <div class="method-panel active" data-panel="file">
+      <div class="dropzone" id="dropzone">
+        <span class="dz-ico">📄</span>
+        גררו לכאן קובץ PDF / DOCX, או לחצו לבחירה
+        <div class="dz-file" id="dz-file" hidden></div>
+      </div>
+      <input type="file" name="file" id="file-input" accept=".pdf,.docx,.txt,.md" hidden>
+    </div>
+
+    <div class="method-panel" data-panel="text">
+      <textarea class="resume-text" name="resume_text" id="resume_text"
+                placeholder="הדביקו כאן את תוכן קורות החיים…"></textarea>
+    </div>
+
+    <div class="method-panel" data-panel="photo">
+      <div class="dropzone" id="photo-drop">
+        <span class="dz-ico">📷</span>
+        בחרו תמונה של קורות החיים מהגלריה
+        <div class="dz-file" id="photo-file" hidden></div>
+      </div>
+      <input type="file" name="photo" id="photo-input" accept="image/*" hidden>
+      <p class="method-note">📸 תמונה ברורה עובדת הכי טוב. לדיוק מרבי — עדיף קובץ PDF/DOCX או הדבקת טקסט.</p>
+    </div>
+
+    <div class="method-panel" data-panel="link">
+      <input type="url" class="link-input" name="resume_url" id="resume_url"
+             placeholder="https://— קישור לאתר אישי או קובץ PDF ציבורי">
+      <p class="method-note">קישור לאתר אישי / PDF ציבורי. לא נתמך ייבוא מ-LinkedIn.</p>
+    </div>
+
+    <div class="wizard-actions">
+      <div class="err-msg" id="step1-err"></div>
+      <div class="spacer"></div>
+      <button type="button" class="btn-primary" id="to-step2">המשך →</button>
+    </div>
+  </section>
+  {% endif %}
+
+  <!-- STEP 2: PREFERENCES -->
+  <section class="card wizard-step {{ 'active' if candidate else '' }}" data-step="2">
+    {% set p = prefs or {} %}
+    <div class="pref-group">
+      <label class="lbl">שכר חודשי מבוקש (₪)</label>
+      <div class="salary-row">
+        <input type="number" name="salary_min" min="0" step="1000" placeholder="למשל 25000"
+               value="{{ p.salary_min or '' }}">
+        <span class="unit">₪ ומעלה</span>
+      </div>
+      <p class="method-note">משמש לדירוג בלבד — משרות ללא שכר מפורסם עדיין יוצגו.</p>
+    </div>
+
+    <div class="pref-group">
+      <label class="lbl">אזור <span class="muted small">(אפשר לבחור כמה)</span></label>
+      {% set sel = p.regions if p.regions is not none else ([p.region] if p.region else []) %}
+      {% set sel = sel or [] %}
+      <div class="region-chips" id="region-group">
+        {% for val, label in [('all','כל הארץ'),('center','מרכז'),('sharon','שרון'),('north','צפון'),('south','דרום'),('jerusalem','ירושלים'),('remote','עבודה מהבית')] %}
+        <button type="button" class="{{ 'on' if (val in sel) or (val == 'all' and not sel) else '' }}" data-val="{{ val }}">{{ label }}</button>
+        {% endfor %}
+      </div>
+      <input type="hidden" name="regions" id="regions-hidden" value="{{ sel|join(',') }}">
+    </div>
+
+    <div class="pref-group">
+      <label class="lbl">היקף משרה</label>
+      <div class="segmented" data-hidden="employment_type">
+        {% set emp = p.employment_type or 'any' %}
+        {% for val, label in [('any','הכל'),('full','מלאה'),('part','חלקית')] %}
+        <button type="button" class="{{ 'on' if emp == val else '' }}" data-val="{{ val }}">{{ label }}</button>
+        {% endfor %}
+      </div>
+      <input type="hidden" name="employment_type" value="{{ p.employment_type or 'any' }}">
+    </div>
+
+    <div class="pref-group">
+      <label class="lbl">אופן עבודה</label>
+      <div class="segmented" data-hidden="remote">
+        {% set rem = p.remote or 'any' %}
+        {% for val, label in [('any','הכל'),('remote','מהבית'),('hybrid','היברידי'),('onsite','מהמשרד')] %}
+        <button type="button" class="{{ 'on' if rem == val else '' }}" data-val="{{ val }}">{{ label }}</button>
+        {% endfor %}
+      </div>
+      <input type="hidden" name="remote" value="{{ p.remote or 'any' }}">
+    </div>
+
+    <div class="pref-group">
+      <label class="lbl">רמת משרה מבוקשת</label>
+      <div class="segmented" data-hidden="target_level">
+        {% set lvl = p.target_level or '' %}
+        {% for val, label in [('','ללא העדפה'),('junior','ג׳וניור'),('mid','מיד'),('senior','בכיר'),('lead','מוביל'),('manager','ניהול')] %}
+        <button type="button" class="{{ 'on' if lvl == val else '' }}" data-val="{{ val }}">{{ label }}</button>
+        {% endfor %}
+      </div>
+      <input type="hidden" name="target_level" value="{{ p.target_level or '' }}">
+    </div>
+
+    <div class="pref-group">
+      <label class="lbl">תפקידים שמעניינים אתכם</label>
+      <div class="roles-box" id="roles-box">
+        <input type="text" id="role-input" placeholder="למשל Backend — הקלידו ו-Enter" autocomplete="off">
+      </div>
+      <input type="hidden" name="roles" id="roles-hidden" value="{{ (p.roles or [])|join(',') }}">
+    </div>
+
+    <div class="wizard-actions">
+      {% if not candidate %}<button type="button" class="btn-ghost" id="to-step1">← חזרה</button>{% endif %}
+      <div class="spacer"></div>
+      <button type="submit" class="btn-primary">{{ "עדכן והרץ מחדש" if candidate else "🔎 מצאו לי משרות" }}</button>
+    </div>
+  </section>
+</form>
+{% endblock %}

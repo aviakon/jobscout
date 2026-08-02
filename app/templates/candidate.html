@@ -1,0 +1,211 @@
+{% extends "base.html" %}
+{% block title %}{{ candidate.name or "מועמד" }} — JobScout{% endblock %}
+{% block content %}
+
+<section class="card profile">
+  <h1>{{ candidate.name or candidate.resume_filename or "מועמד" }}</h1>
+  {% if profile.headline %}<p class="headline">{{ profile.headline }}</p>{% endif %}
+  {% if profile.summary %}<p class="muted">{{ profile.summary }}</p>{% endif %}
+  <div class="chips" id="skill-chips" data-candidate="{{ candidate.public_id }}">
+    {% for s in profile.get('skills', []) %}
+    {% set yrs = candidate.skill_experience.get(s, 0) %}
+    <button type="button" class="chip{{ ' has-exp' if yrs else '' }}" data-skill="{{ s }}" data-years="{{ yrs }}">
+      <span class="chip-name">{{ s }}</span>
+      <span class="chip-years">{{ (yrs ~ 'y') if yrs else '+' }}</span>
+    </button>{% endfor %}
+    <div class="add-skill" id="add-skill">
+      <input type="text" id="skill-search" placeholder="➕ הוסף כישור…" autocomplete="off"
+             aria-label="חפש והוסף כישור">
+      <ul class="skill-suggest" id="skill-suggest" hidden></ul>
+    </div>
+  </div>
+  <p class="muted small chips-hint">💡 לחץ על כישור כדי לדרג שנות ניסיון, או הקלד למעלה כדי להוסיף כישור — זה משפר את דיוק ההתאמות.</p>
+  <script type="application/json" id="all-skills-data">{{ all_skills|tojson }}</script>
+
+  <!-- experience gauge modal -->
+  <div class="gauge-modal" id="gauge-modal" hidden>
+    <div class="gauge-box">
+      <button type="button" class="gauge-close" aria-label="סגור">✕</button>
+      <h3 id="gauge-skill">Skill</h3>
+      <p class="muted small">שנות ניסיון</p>
+      <div class="gauge">
+        <svg viewBox="0 0 120 120" class="gauge-svg">
+          <circle cx="60" cy="60" r="52" class="gauge-track"/>
+          <circle cx="60" cy="60" r="52" class="gauge-fill" id="gauge-arc"
+                  transform="rotate(-90 60 60)"/>
+        </svg>
+        <div class="gauge-center"><span id="gauge-num">0</span><small id="gauge-unit">שנים</small></div>
+      </div>
+      <div class="gauge-controls">
+        <button type="button" class="gauge-step" data-step="-1">−</button>
+        <input type="range" id="gauge-range" min="0" max="15" step="1" value="0">
+        <button type="button" class="gauge-step" data-step="1">+</button>
+      </div>
+      <p class="gauge-saved" id="gauge-saved"></p>
+      <button type="button" class="gauge-remove" id="gauge-remove">🗑️ הסר כישור</button>
+    </div>
+  </div>
+  <div class="meta">
+    {% if profile.seniority %}<span>רמה: {{ profile.seniority }}</span>{% endif %}
+    {% if profile.total_years_experience %}<span>ותק: {{ profile.total_years_experience }} שנים</span>{% endif %}
+    {% if profile.remote_pref %}<span>העדפה: {{ profile.remote_pref }}</span>{% endif %}
+  </div>
+
+  {% if profile.experiences %}
+  <div class="exp-list">
+    <h3 class="exp-title">ניסיון תעסוקתי</h3>
+    {% for e in profile.experiences %}
+    <div class="exp-row">
+      <span class="exp-role">{{ e.title }}{% if e.is_military %}<span class="exp-mil">שירות צבאי</span>{% endif %}</span>
+      <span class="exp-dates">{{ e.start }}–{{ e.end }}</span>
+      <span class="exp-years">{{ e.years|int }} שנים</span>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% if profile.education %}
+  <div class="exp-list">
+    <h3 class="exp-title">🎓 השכלה</h3>
+    {% for ed in profile.education %}
+    <div class="exp-row">
+      <span class="exp-role">{{ ed.degree }}{% if ed.field %} · {{ ed.field }}{% endif %}</span>
+      <span class="exp-dates">{{ ed.institution }}</span>
+      {% if ed.year %}<span class="exp-years">{{ ed.year }}</span>{% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <form action="/candidate/{{ candidate.public_id }}/search" method="post" class="search-form" data-loading="מחפש משרות בכל המקורות ומדרג אותן מול הפרופיל שלך…">
+    <label>מיקום: <input type="text" name="location" value="Israel"></label>
+    <button type="submit">🔎 חפש משרות עכשיו</button>
+  </form>
+  <p class="muted small">החיפוש עשוי לקחת דקה — סורק מקורות רבים ומדרג כל משרה מול הפרופיל שלך.</p>
+  {% if candidate.last_summary %}
+  {% set su = candidate.last_summary %}
+  <p class="run-summary">📊 בסריקה האחרונה: {{ su.raw_postings }} משרות נסרקו · {{ su.matches_kept }} התאמות ·
+    מנוע: {{ "AI (Claude)" if su.engine == "llm" else "מקומי (ללא מפתח)" }}</p>
+  {% endif %}
+</section>
+
+{% if preferences %}
+{% set pf = preferences %}
+{% set region_labels = {'center':'מרכז','sharon':'שרון','north':'צפון','south':'דרום','jerusalem':'ירושלים','remote':'עבודה מהבית'} %}
+{% set remote_labels = {'any':'הכל','remote':'מהבית','hybrid':'היברידי','onsite':'מהמשרד'} %}
+{% set emp_labels = {'any':'כל היקף','full':'משרה מלאה','part':'משרה חלקית'} %}
+{% set regs = pf.regions if pf.regions is not none else ([pf.region] if pf.region and pf.region != 'all' else []) %}
+<section class="card">
+  <div class="pref-summary">
+    <span class="muted small">ההעדפות שלך:</span>
+    <span class="pref-pill">אזור: <b>{% if regs %}{% for r in regs %}{{ region_labels.get(r, r) }}{{ ', ' if not loop.last }}{% endfor %}{% else %}כל הארץ{% endif %}</b></span>
+    {% if pf.salary_min %}<span class="pref-pill">שכר: <b>{{ '{:,}'.format(pf.salary_min) }} ₪+</b></span>{% endif %}
+    <span class="pref-pill">{{ emp_labels.get(pf.employment_type, 'כל היקף') }}</span>
+    {% if pf.remote and pf.remote != 'any' %}<span class="pref-pill">{{ remote_labels.get(pf.remote) }}</span>{% endif %}
+    {% if pf.target_level %}<span class="pref-pill">רמה: <b>{{ pf.target_level }}</b></span>{% endif %}
+    {% for r in pf.roles or [] %}<span class="pref-pill">{{ r }}</span>{% endfor %}
+    <a class="pref-edit" href="/start?candidate={{ candidate.public_id }}">✎ ערוך העדפות</a>
+  </div>
+</section>
+{% endif %}
+
+{% if matches %}
+<section class="card stats-bar">
+  {% set scores = matches|map(attribute='score')|list %}
+  <div class="stat"><span class="stat-num">{{ matches|length }}</span><span class="stat-label">התאמות</span></div>
+  <div class="stat"><span class="stat-num">{{ scores|max|int }}</span><span class="stat-label">ציון מקסימלי</span></div>
+  <div class="stat"><span class="stat-num">{{ ((scores|sum)/(scores|length))|round|int }}</span><span class="stat-label">ציון ממוצע</span></div>
+  <div class="stat"><span class="stat-num">{{ matches|selectattr('score','ge',80)|list|length }}</span><span class="stat-label">התאמות מעולות (80+)</span></div>
+  <div class="stat"><span class="stat-num">{{ matches|map(attribute='job.company')|unique|list|length }}</span><span class="stat-label">חברות</span></div>
+</section>
+{% endif %}
+
+{% if candidate.gap_analysis %}
+<section class="card gap-panel">
+  <h2>💡 ניתוח פערים</h2>
+  <p class="muted">כישורים שחוזרים בהרבה מהמשרות המתאימות אך חסרים בקורות החיים שלך — שווה להוסיף או ללמוד:</p>
+  <div class="gap-bars">
+    {% for g in candidate.gap_analysis %}
+    <div class="gap-row">
+      <span class="gap-name">{{ g.skill }}</span>
+      <span class="gap-bar"><span class="gap-fill" style="width: {{ g.pct }}%"></span></span>
+      <span class="gap-pct">{{ g.pct }}%</span>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+<section class="card">
+  <div class="digest-head">
+    <h2>משרות מתאימות <span class="muted">({{ matches|length }})</span></h2>
+    <a href="/candidate/{{ candidate.public_id }}/digest" class="digest-link">📬 דיג'סט משרות חדשות
+      {% set nnew = matches|selectattr('notified_at','none')|list|length %}
+      {% if nnew %}<span class="new-count">{{ nnew }}</span>{% endif %}</a>
+  </div>
+  {% if not matches %}
+    <p class="muted">עדיין אין תוצאות. לחץ "חפש משרות עכשיו" למעלה.</p>
+  {% endif %}
+
+  {% if matches %}
+  <div class="toolbar" id="matches-toolbar">
+    <label>מיון:
+      <select data-control="sort">
+        <option value="score">ציון (גבוה→נמוך)</option>
+        <option value="company">חברה (א→ת)</option>
+        <option value="new">חדשות קודם</option>
+      </select>
+    </label>
+    <label>מקור:
+      <select data-control="source">
+        <option value="">הכל</option>
+        {% for s in matches|map(attribute='job.source')|unique|sort %}
+        <option value="{{ s }}">{{ s }}</option>{% endfor %}
+      </select>
+    </label>
+    <label>ציון מינימלי: <span class="minscore-val">0</span>
+      <input type="range" data-control="minscore" min="0" max="100" step="5" value="0">
+    </label>
+    <label class="chk"><input type="checkbox" data-control="newonly"> חדשות בלבד</label>
+    <span class="visible-count" id="visible-count"></span>
+  </div>
+  {% endif %}
+
+  <div class="matches" id="matches-list">
+    {% for m in matches %}
+    <article class="match" data-status="{{ m.status }}" data-score="{{ m.score|int }}"
+             data-source="{{ m.job.source }}" data-company="{{ m.job.company }}"
+             data-new="{{ '1' if not m.notified_at else '0' }}">
+      <div class="score-badge score-{{ (m.score // 20)|int }}">{{ m.score|int }}</div>
+      <div class="match-body">
+        <h3><a href="{{ m.job.url }}" target="_blank" rel="noopener">{{ m.job.title }}</a>
+          {% if not m.notified_at %}<span class="new-badge">✨ חדש</span>{% endif %}</h3>
+        <div class="match-meta">
+          <strong>{{ m.job.company }}</strong>
+          {% if m.job.location %}· {{ m.job.location }}{% endif %}
+          {% if m.job.remote %}· {{ m.job.remote }}{% endif %}
+          <span class="source-tag">{{ m.job.source }}</span>
+        </div>
+        {% if m.fit_flags %}
+        <div class="fit-badges">{% for f in m.fit_flags %}<span class="fit-badge">{{ f }}</span>{% endfor %}</div>
+        {% endif %}
+        {% if m.verdict %}<p class="verdict">{{ m.verdict }}</p>{% endif %}
+        {% if m.why %}
+        <ul class="why">{% for w in m.why %}<li>✅ {{ w }}</li>{% endfor %}</ul>
+        {% endif %}
+        {% if m.gaps %}
+        <ul class="gaps">{% for g in m.gaps %}<li>⚠️ {{ g }}</li>{% endfor %}</ul>
+        {% endif %}
+        <div class="actions">
+          <a class="cl-link" href="/candidate/{{ candidate.public_id }}/match/{{ m.id }}/cover-letter">✍️ מכתב מקדים</a>
+          <button data-match="{{ m.id }}" data-status="saved">💾 שמור</button>
+          <button data-match="{{ m.id }}" data-status="applied">📮 הגשתי</button>
+          <button data-match="{{ m.id }}" data-status="hidden">🗑️ הסתר</button>
+          <span class="status-label">{{ m.status }}</span>
+        </div>
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

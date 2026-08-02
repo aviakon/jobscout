@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}דיג'סט — {{ candidate.name }}{% endblock %}
+{% block content %}
+
+<section class="card">
+  <div class="digest-head">
+    <div>
+      <h1>📬 דיג'סט משרות חדשות</h1>
+      <p class="muted">{{ candidate.name or "מועמד" }} · רק משרות בציון {{ min_score|int }}+ שעדיין לא סימנת</p>
+    </div>
+    <a href="/candidate/{{ candidate.public_id }}" class="back-link">← לכל ההתאמות</a>
+  </div>
+
+  <div class="digest-actions">
+    <form action="/candidate/{{ candidate.public_id }}/digest/rescan" method="post" data-loading="סורק מחדש את השוק ומחפש משרות חדשות…">
+      <input type="hidden" name="location" value="Israel">
+      <button type="submit">🔄 רענן וחפש משרות חדשות</button>
+    </form>
+    {% if new_matches %}
+    <form action="/candidate/{{ candidate.public_id }}/digest/ack" method="post">
+      <button type="submit" class="secondary">✓ סמן הכל כנקרא</button>
+    </form>
+    {% endif %}
+  </div>
+</section>
+
+<section class="card">
+  <h2>{{ new_matches|length }} משרות חדשות</h2>
+  {% if not new_matches %}
+    <p class="muted">אין משרות חדשות כרגע. לחץ "רענן" כדי לסרוק שוב את השוק. 🎉</p>
+  {% endif %}
+  <div class="matches">
+    {% for m in new_matches %}
+    <article class="match">
+      <div class="score-badge score-{{ (m.score // 20)|int }}">{{ m.score|int }}</div>
+      <div class="match-body">
+        <h3><a href="{{ m.job.url }}" target="_blank" rel="noopener">{{ m.job.title }}</a>
+          <span class="new-badge">✨ חדש</span></h3>
+        <div class="match-meta">
+          <strong>{{ m.job.company }}</strong>
+          {% if m.job.location %}· {{ m.job.location }}{% endif %}
+          <span class="source-tag">{{ m.job.source }}</span>
+        </div>
+        {% if m.verdict %}<p class="verdict">{{ m.verdict }}</p>{% endif %}
+        {% if m.why %}<ul class="why">{% for w in m.why %}<li>✅ {{ w }}</li>{% endfor %}</ul>{% endif %}
+        <div class="actions">
+          <a class="cl-link" href="/candidate/{{ candidate.public_id }}/match/{{ m.id }}/cover-letter">✍️ מכתב מקדים</a>
+        </div>
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

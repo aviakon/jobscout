@@ -1,0 +1,32 @@
+Daniel Cohen
+Senior Backend Engineer
+Tel Aviv, Israel | daniel.cohen@example.com | linkedin.com/in/danielcohen
+
+SUMMARY
+Senior Backend Engineer with 8 years of experience building scalable distributed
+systems and microservices. Strong background in Python, cloud infrastructure, and
+data-intensive applications. Passionate about clean architecture and mentoring.
+
+EXPERIENCE
+
+Senior Backend Engineer — Fintech Startup (2020 - Present)
+- Designed and built microservices in Python (FastAPI) serving 5M+ daily requests
+- Led migration to Kubernetes on AWS, cutting infra costs by 30%
+- Built real-time data pipelines with Kafka and PostgreSQL
+- Mentored a team of 4 junior engineers (team lead responsibilities)
+
+Backend Engineer — E-commerce Company (2016 - 2020)
+- Developed REST APIs and GraphQL services with Python and Node.js
+- Implemented CI/CD pipelines with Docker and GitHub Actions
+- Optimized MySQL and Redis caching layers for high-traffic endpoints
+
+SKILLS
+Python, FastAPI, Django, Node.js, Microservices, REST, GraphQL,
+Kubernetes, Docker, AWS, Terraform, CI/CD, PostgreSQL, MySQL, Redis,
+Kafka, Linux, Machine Learning (basic)
+
+EDUCATION
+B.Sc. Computer Science, Tel Aviv University (2012 - 2016)
+
+LANGUAGES
+Hebrew (native), English (fluent)

@@ -1,0 +1,72 @@
+# Seed list of company job boards mapped to their ATS.
+# The pipeline hits each board's public API directly — this is where "hidden"
+# jobs live that never make it to LinkedIn.
+#
+# Slugs occasionally change; if a board returns nothing it is skipped silently.
+# Add your own target companies here — this list is meant to grow.
+#
+# How to find a slug: open a company's careers page and look at the URL/network:
+#   greenhouse -> boards.greenhouse.io/<slug>
+#   lever      -> jobs.lever.co/<slug>
+#   ashby      -> jobs.ashbyhq.com/<slug>
+#   comeet     -> careers page network call has company/<uid>/positions?token=<token>
+
+# Verified working slugs (probed live). Add more as you find them.
+greenhouse:
+  - { board: gongio, company: "Gong" }
+  - { board: wizinc, company: "Wiz" }
+  - { board: riskified, company: "Riskified" }
+  - { board: similarweb, company: "Similarweb" }
+  - { board: fireblocks, company: "Fireblocks" }
+  - { board: payoneer, company: "Payoneer" }
+  - { board: lightricks, company: "Lightricks" }
+  - { board: melio, company: "Melio" }
+  - { board: jfrog, company: "JFrog" }
+  - { board: appsflyer, company: "AppsFlyer" }
+  - { board: taboola, company: "Taboola" }
+  - { board: yotpo, company: "Yotpo" }
+  - { board: forter, company: "Forter" }
+  - { board: optimove, company: "Optimove" }
+  - { board: bigid, company: "BigID" }
+  - { board: cybereason, company: "Cybereason" }
+  - { board: orca, company: "Orca Security" }
+  - { board: imubit, company: "Imubit" }
+  - { board: sisense, company: "Sisense" }
+  - { board: singlestore, company: "SingleStore" }
+  - { board: nice, company: "NICE" }
+  - { board: vast, company: "VAST Data" }
+  - { board: elastic, company: "Elastic" }
+  - { board: apiiro, company: "Apiiro" }
+  - { board: augury, company: "Augury" }
+  - { board: axonius, company: "Axonius" }
+  - { board: bringg, company: "Bringg" }
+  - { board: descope, company: "Descope" }
+  - { board: dremio, company: "Dremio" }
+  - { board: lightrun, company: "Lightrun" }
+  - { board: pagaya, company: "Pagaya" }
+  - { board: samsungnext, company: "Samsung Next" }
+  - { board: torq, company: "Torq" }
+  - { board: tripactions, company: "Navan (TripActions)" }
+  - { board: zoominfo, company: "ZoomInfo" }
+
+lever:
+  - { board: walkme, company: "WalkMe" }
+
+ashby:
+  - { board: lemonade, company: "Lemonade" }
+  - { board: pinecone, company: "Pinecone" }
+  - { board: ramp, company: "Ramp" }
+  - { board: notion, company: "Notion" }
+  - { board: linear, company: "Linear" }
+  - { board: openai, company: "OpenAI" }
+  - { board: finout, company: "Finout" }
+  - { board: oligo, company: "Oligo Security" }
+
+# Comeet boards need a public uid+token pair (from the careers page).
+# Left empty by default — add companies you care about.
+comeet: []
+
+# Free-text queries sent to JSearch (aggregates Google for Jobs incl. LinkedIn).
+# These are derived from the resume at runtime; listed here as fallbacks/defaults.
+jsearch_default_queries:
+  - "software engineer"
