@@ -147,10 +147,20 @@ There's no login system, so two things matter for a public URL:
 
 ### Deploying to Railway
 
+The live service deploys from GitHub. After the first setup, a `git push` is all
+that's needed, **provided auto-deploy is on**:
+
+> Railway → service → Settings → Source → "Branch connected to production".
+> If it says **"Auto deploy is disabled"**, click **Enable**. Without it, pushes
+> are silently ignored and the site keeps serving the old build even though
+> Railway reports "Deployment successful" for the previous commit.
+
+To deploy from this folder instead of GitHub:
+
 ```bash
-railway login      # opens a browser — creates/logs into your Railway account
-railway init        # links this folder to a new Railway project
-railway up           # builds and deploys
+railway login       # authorizes the CLI (use --browserless if the browser hangs)
+railway link         # links this folder to the existing project
+railway up            # builds and deploys
 ```
 
 Then in the Railway dashboard for the service:
