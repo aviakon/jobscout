@@ -35,10 +35,28 @@ logging.basicConfig(level=logging.INFO)
 app = FastAPI(title="JobScout")
 BASE = config.BASE_DIR / "app"
 templates = Jinja2Templates(directory=str(BASE / "templates"))
+
+
+def _asset_version() -> str:
+    """Fingerprint of the CSS/JS, appended to their URLs.
+
+    Without it a returning visitor keeps the copy their browser cached before
+    the deploy, so a fixed page stays broken for exactly the people who already
+    use the site. Computed once per boot, which is when the files can change.
+    """
+    try:
+        newest = max((BASE / "static" / name).stat().st_mtime
+                     for name in ("style.css", "app.js"))
+        return str(int(newest))
+    except OSError:
+        return "0"
+
+
 # Available to every template (the footer credit on all pages needs them)
 templates.env.globals.update(
     site_author=config.SITE_AUTHOR,
     contact_email=config.CONTACT_EMAIL,
+    asset_version=_asset_version(),
 )
 app.mount("/static", StaticFiles(directory=str(BASE / "static")), name="static")
 
