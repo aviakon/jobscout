@@ -61,6 +61,14 @@ def _startup() -> None:
     init_db()
     from app.sources.registry import board_count
 
+    key = config.stats_key()
+    if key:
+        # Printed once per boot so the owner can find their private dashboard
+        # without any setup. Set STATS_KEY yourself to keep it out of the logs.
+        logging.info("usage dashboard: /stats/%s", key)
+    else:
+        logging.warning("no stats key available (read-only data dir) - /stats is closed")
+
     boards = board_count()
     if boards:
         logging.info("job sources ready: %d company boards", boards)
@@ -116,7 +124,8 @@ def stats_dashboard(key: str, request: Request, session: Session = Depends(get_s
     exist at all — that way an unconfigured deploy can never leak the numbers,
     and a wrong guess is indistinguishable from a missing page.
     """
-    if not config.STATS_KEY or not secrets.compare_digest(key, config.STATS_KEY):
+    expected = config.stats_key()
+    if not expected or not secrets.compare_digest(key, expected):
         raise HTTPException(404)
     return templates.TemplateResponse(
         request, "stats.html", {"s": analytics.summary(session), "key": key}

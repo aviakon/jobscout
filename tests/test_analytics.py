@@ -14,7 +14,7 @@ from app.models import Candidate, Visit
 
 @pytest.fixture
 def stats_key(monkeypatch):
-    monkeypatch.setattr(config, "STATS_KEY", "test-secret-key")
+    monkeypatch.setattr(config, "stats_key", lambda: "test-secret-key")
     return "test-secret-key"
 
 
@@ -88,7 +88,7 @@ def test_referrer_query_strings_are_dropped(client, sqlite_session):
 # --- access -----------------------------------------------------------------
 
 def test_the_dashboard_is_hidden_without_a_key(client, monkeypatch):
-    monkeypatch.setattr(config, "STATS_KEY", "")
+    monkeypatch.setattr(config, "stats_key", lambda: "")
     assert client.get("/stats/anything").status_code == 404
 
 
@@ -101,6 +101,23 @@ def test_the_right_key_opens_the_dashboard(client, sqlite_session, stats_key):
     resp = client.get(f"/stats/{stats_key}")
     assert resp.status_code == 200
     assert "נתוני שימוש" in resp.text
+
+
+def test_a_key_is_generated_and_then_reused(tmp_path, monkeypatch):
+    """The dashboard must work with no manual setup, and keep the same URL
+    across restarts so a bookmark does not rot."""
+    monkeypatch.delenv("STATS_KEY", raising=False)
+    monkeypatch.setattr(config, "STATS_KEY_FILE", tmp_path / ".stats_key")
+
+    first = config.stats_key()
+    assert len(first) > 20            # unguessable
+    assert config.stats_key() == first  # stable across boots
+
+
+def test_an_explicit_key_wins_over_the_generated_one(tmp_path, monkeypatch):
+    monkeypatch.setattr(config, "STATS_KEY_FILE", tmp_path / ".stats_key")
+    monkeypatch.setenv("STATS_KEY", "chosen-by-hand")
+    assert config.stats_key() == "chosen-by-hand"
 
 
 def test_analytics_never_breaks_a_page(client, sqlite_session, monkeypatch):

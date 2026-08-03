@@ -32,7 +32,7 @@ def test_onboarding_page_has_no_dashes(client):
 def test_stats_dashboard_has_no_dashes(client, monkeypatch):
     from app import config
 
-    monkeypatch.setattr(config, "STATS_KEY", "k")
+    monkeypatch.setattr(config, "stats_key", lambda: "k")
     assert _no_dashes(client.get("/stats/k").text)
 
 

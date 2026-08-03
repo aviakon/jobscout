@@ -67,9 +67,33 @@ SITE_AUTHOR: str = "Avia Konfino"
 CONTACT_EMAIL: str = os.getenv("CONTACT_EMAIL", "avia.konfino@gmail.com")
 AD_SLOTS: int = int(os.getenv("AD_SLOTS", "2"))   # slots above the match list
 
-# Usage analytics. The dashboard is unreachable unless STATS_KEY is set, since
-# the site is public and has no login.
-STATS_KEY: str = os.getenv("STATS_KEY", "")
+# Usage analytics. The site is public and has no login, so the dashboard hides
+# behind an unguessable key rather than a password.
+STATS_KEY_FILE = DATA_DIR / ".stats_key"
+
+
+def stats_key() -> str:
+    """Secret that unlocks /stats/<key>.
+
+    Set STATS_KEY to choose your own (and keep it out of the logs). Otherwise
+    one is generated on first boot and kept in the data volume, so the
+    dashboard works without any manual setup and the URL stays stable across
+    deploys. Returns "" only if the key cannot be read or written, in which
+    case the dashboard stays closed rather than open.
+    """
+    env = os.getenv("STATS_KEY")
+    if env:
+        return env
+    try:
+        if STATS_KEY_FILE.exists():
+            saved = STATS_KEY_FILE.read_text(encoding="utf-8").strip()
+            if saved:
+                return saved
+        value = secrets.token_urlsafe(18)
+        STATS_KEY_FILE.write_text(value, encoding="utf-8")
+        return value
+    except OSError:
+        return ""
 # Secret used to hash visitors instead of storing IPs. Persisted (not per-process)
 # so the same person stays the same anonymous id across restarts.
 ANALYTICS_SALT_FILE = DATA_DIR / ".analytics_salt"

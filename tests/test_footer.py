@@ -46,5 +46,5 @@ def test_every_page_offers_the_advertising_contact(pages):
 
 
 def test_the_stats_dashboard_is_credited_too(client, monkeypatch):
-    monkeypatch.setattr(config, "STATS_KEY", "k")
+    monkeypatch.setattr(config, "stats_key", lambda: "k")
     assert config.SITE_AUTHOR in client.get("/stats/k").text
