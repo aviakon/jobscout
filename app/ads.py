@@ -102,7 +102,11 @@ def house_ad(index: int = 0) -> Ad:
 
 
 def slots_for(profile: dict | None = None, count: int | None = None) -> list[Ad]:
-    """The ad strip: paying sponsors first, unsold slots filled with house ads."""
+    """The ad strip: paying sponsors first, then a single invitation to advertise.
+
+    Only ever ONE house ad, however many slots are unsold — the same "advertise
+    here" card repeated looks like a rendering fault, not like inventory.
+    """
     count = config.AD_SLOTS if count is None else count
     if count <= 0:
         return []
@@ -121,4 +125,6 @@ def slots_for(profile: dict | None = None, count: int | None = None) -> list[Ad]
         if _within_campaign_window(ad, today) and _matches_targeting(ad, terms)
     ][:count]
 
-    return sponsors + [house_ad(i) for i in range(count - len(sponsors))]
+    if len(sponsors) >= count:
+        return sponsors
+    return sponsors + [house_ad(0)]

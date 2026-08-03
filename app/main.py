@@ -89,9 +89,12 @@ async def _track_page_views(request: Request, call_next):
         if (request.method == "GET" and response.status_code < 400
                 and analytics.should_track(request.url.path)
                 and "text/html" in response.headers.get("content-type", "")):
+            # automated clients are logged separately so they never inflate
+            # the visitor numbers
+            kind = "bot" if analytics.is_bot(request.headers.get("user-agent", "")) else "page"
             session = db.new_session()
             try:
-                analytics.record(session, kind="page", request=request)
+                analytics.record(session, kind=kind, request=request)
             finally:
                 session.close()
     except Exception as e:  # noqa: BLE001

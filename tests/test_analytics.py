@@ -61,6 +61,44 @@ def test_the_summary_adds_up(client, sqlite_session, stats_key):
     assert len(s["series"]) == 30           # zero-filled month
 
 
+# --- humans vs machines -----------------------------------------------------
+
+@pytest.mark.parametrize("ua", [
+    "curl/8.4.0",                                   # our own deploy checks
+    "python-httpx/0.27",
+    "Mozilla/5.0 (compatible; Googlebot/2.1)",
+    "Better Uptime Bot",
+    "HeadlessChrome/120.0",
+    "",                                             # no UA at all is a script
+])
+def test_automated_clients_are_not_counted_as_visitors(client, sqlite_session, ua):
+    client.get("/", headers={"User-Agent": ua})
+    s = analytics.summary(sqlite_session)
+    assert s["today"]["visitors"] == 0, f"{ua!r} was counted as a person"
+    assert s["today"]["bot_views"] == 1  # still recorded, just kept separate
+
+
+def test_a_real_browser_is_counted(client, sqlite_session):
+    ua = ("Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 "
+          "(KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1")
+    client.get("/", headers={"User-Agent": ua})
+    s = analytics.summary(sqlite_session)
+    assert s["today"]["visitors"] == 1
+    assert s["today"]["bot_views"] == 0
+
+
+def test_bots_and_people_are_counted_separately(client, sqlite_session):
+    browser = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0 Safari/537.36"
+    for _ in range(4):
+        client.get("/", headers={"User-Agent": "curl/8.4.0"})
+    client.get("/", headers={"User-Agent": browser})
+
+    s = analytics.summary(sqlite_session)
+    assert s["today"]["views"] == 1        # the human one
+    assert s["today"]["visitors"] == 1
+    assert s["today"]["bot_views"] == 4
+
+
 # --- privacy ----------------------------------------------------------------
 
 def test_no_ip_address_or_user_agent_is_stored(client, sqlite_session):

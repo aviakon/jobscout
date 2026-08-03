@@ -22,10 +22,11 @@ def sponsors_file(tmp_path, monkeypatch):
     return write
 
 
-def test_unsold_slots_show_the_contact_invitation(sponsors_file):
+def test_with_nothing_sold_there_is_exactly_one_invitation(sponsors_file):
+    """The same "advertise here" card repeated reads as a rendering fault."""
     slots = ads.slots_for()
-    assert len(slots) == config.AD_SLOTS
-    assert all(a.is_house_ad for a in slots)
+    assert len(slots) == 1
+    assert slots[0].is_house_ad
     assert config.CONTACT_EMAIL in slots[0].body
     assert slots[0].url.startswith("mailto:")
 
@@ -42,7 +43,29 @@ sponsors:
     assert slots[0].slug == "acme"
     assert slots[0].paid is True
     assert slots[1].is_house_ad          # second slot still for sale
-    assert len(slots) == config.AD_SLOTS
+    assert len(slots) == 2
+
+
+def test_when_every_slot_is_sold_no_invitation_is_shown(sponsors_file):
+    sponsors_file("""
+sponsors:
+  - slug: one
+    title: מודעה א
+  - slug: two
+    title: מודעה ב
+  - slug: three
+    title: מודעה ג
+""")
+    slots = ads.slots_for()
+    assert [a.slug for a in slots] == ["one", "two"]   # capped at AD_SLOTS
+    assert not any(a.is_house_ad for a in slots)
+
+
+def test_only_one_invitation_renders_on_the_page(client, sqlite_session, sponsors_file):
+    c = _candidate_with_match(sqlite_session)
+    page = client.get(f"/candidate/{c.public_id}").text
+    assert page.count("רוצים לפרסם כאן") == 1
+    assert page.count('class="ad-card') == 1
 
 
 def test_paused_and_expired_ads_do_not_show(sponsors_file):
@@ -87,8 +110,8 @@ sponsors:
 def test_a_broken_sponsors_file_does_not_break_the_page(sponsors_file):
     sponsors_file("sponsors: [ this is not: valid: yaml")
     slots = ads.slots_for()
-    assert len(slots) == config.AD_SLOTS
-    assert all(a.is_house_ad for a in slots)
+    assert len(slots) == 1
+    assert slots[0].is_house_ad
 
 
 # --- the integrity line -----------------------------------------------------

@@ -44,6 +44,24 @@ def should_track(path: str) -> bool:
     return not path.startswith(_IGNORED_PREFIXES)
 
 
+# Automated clients: our own deploy checks (curl), uptime probes, and crawlers.
+# They are real requests, so they are still recorded — but as `bot`, never mixed
+# into the human numbers, otherwise "visitors" flatters you with your own tools.
+_BOT_MARKERS = (
+    "bot", "crawler", "spider", "scraper", "curl", "wget", "httpx", "python-requests",
+    "python-urllib", "go-http", "java/", "okhttp", "headless", "phantomjs", "puppeteer",
+    "playwright", "lighthouse", "pingdom", "uptime", "monitor", "probe", "scanner",
+    "preview", "facebookexternalhit", "slackbot", "whatsapp", "telegrambot", "railway",
+)
+
+
+def is_bot(user_agent: str) -> bool:
+    ua = (user_agent or "").lower()
+    if not ua:
+        return True  # a browser always sends one; a blank UA is a script
+    return any(marker in ua for marker in _BOT_MARKERS)
+
+
 def record(session: Session, *, kind: str, request: Request | None = None,
            path: str = "", label: str = "") -> None:
     """Best-effort write of one event. Never raises."""
@@ -95,6 +113,8 @@ def summary(session: Session) -> dict:
             "visitors": _count(session, kind="page", since=since, unique=True),
             "scans": _count(session, kind="scan", since=since),
             "profiles": _count(session, kind="onboard", since=since),
+            # shown separately so a busy-looking day is never just robots
+            "bot_views": _count(session, kind="bot", since=since),
         }
 
     # daily series for the chart (30 days, zero-filled so gaps stay visible)

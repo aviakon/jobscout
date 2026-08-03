@@ -529,3 +529,4 @@ body.landing .site-footer { margin-top: 0; border-top: 0; padding: 0.5rem 1rem; 
 .stats-table th, .stats-table td { text-align: start; padding: 0.45rem 0.6rem; border-bottom: 1px solid var(--border); }
 .stats-table th { color: var(--muted); font-weight: 600; font-size: 0.82rem; }
 .stats-table tbody tr:last-child td { border-bottom: 0; }
+.sb-bots { color: var(--muted); font-size: 0.78rem; opacity: 0.75; margin-top: 0.15rem; }
