@@ -319,13 +319,18 @@ body.landing .full { flex: 1; width: 100%;  /* auto side margins would otherwise
 .hero-rotator { display: grid; justify-items: center; align-items: center; }
 .hero-line {
   grid-area: 1 / 1;
-  font-size: clamp(1.6rem, min(4.6vw, 4.6vh), 3.4rem); font-weight: 700; line-height: 1.2; letter-spacing: 0;
-  max-width: 15ch; text-wrap: balance; margin: 0; opacity: 0; transform: translateY(14px);
+  font-size: clamp(1.9rem, min(5.6vw, 6.4vh), 3.7rem); font-weight: 700; line-height: 1.18; letter-spacing: 0;
+  /* never wider than the paragraph below it, at any font size */
+  /* 33rem is the paragraph's own rendered cap (56ch at its largest size), so the
+     headline can grow but never end up wider than the text underneath it */
+  max-width: min(19ch, 33rem, 100%); text-wrap: balance; margin: 0; opacity: 0; transform: translateY(14px);
   transition: opacity .6s ease, transform .6s ease; background: linear-gradient(120deg, #fff 30%, #b9c6ff 70%, #7de0bd);
   -webkit-background-clip: text; background-clip: text; color: transparent;
 }
 .hero-line.on { opacity: 1; transform: translateY(0); }
-.hero-sub { color: var(--muted); font-size: clamp(0.9rem, 1.7vw, 1.2rem); max-width: 56ch;
+/* 33rem is the shared measure: the headline is capped to the same value, so it
+   can grow without ever becoming wider than this paragraph */
+.hero-sub { color: var(--muted); font-size: clamp(0.9rem, 1.7vw, 1.2rem); max-width: min(33rem, 100%);
   margin: clamp(0.7rem, 2vh, 1.2rem) auto clamp(1rem, 2.6vh, 2rem); }
 .cta-row { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; }
 .btn-primary {
@@ -358,26 +363,35 @@ body.landing .full { flex: 1; width: 100%;  /* auto side margins would otherwise
   background: var(--glass); border: 1px solid var(--glass-border); border-radius: 12px; transition: transform .15s, border-color .15s;
 }
 .ret-card:hover { transform: translateY(-2px); border-color: var(--accent); }
-/* Keeping the landing page scroll-free on phones and short windows: the cards
-   drop to icon + title (the descriptions are the only thing that will not fit)
-   and the buttons stay on one row. */
-@media (max-width: 560px), (max-height: 700px) {
+/* NARROW screens only. On a phone the four cards stack two across, so their
+   descriptions are the one thing that genuinely cannot fit. A short but wide
+   window has room for them, so width is the condition here, never height. */
+@media (max-width: 560px) {
   body.landing .feature p { display: none; }
   body.landing .feature { text-align: center; }
-  body.landing .cta-row .btn-primary,
-  body.landing .cta-row .btn-ghost { font-size: 0.95rem; padding: 0.7rem 1.1rem; }
+  body.landing .cta-row .btn-primary { font-size: 0.95rem; padding: 0.7rem 1.1rem; }
   body.landing .ret-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
   body.landing .hero-sub {
     display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
   }
 }
 
-/* Short windows (small laptops, phones in landscape): tighten the chrome too. */
+/* SHORT windows (small laptops, display scaling, phones in landscape): tighten
+   the chrome and trim the paragraph, but keep the card text. */
 @media (max-height: 700px) {
   body.landing .topbar.minimal { padding: 0.5rem 1.2rem; }
-  body.landing .full { gap: clamp(0.6rem, 2.2vh, 1.4rem); padding-block: 0.4rem; }
-  body.landing .eyebrow { margin-bottom: clamp(0.4rem, 1.2vh, 0.8rem); }
-  body.landing .hero-sub { -webkit-line-clamp: 2; margin-bottom: clamp(0.6rem, 1.8vh, 1rem); }
+  body.landing .full { gap: clamp(0.5rem, 1.8vh, 1.2rem); padding-block: 0.35rem; }
+  body.landing .eyebrow { margin-bottom: clamp(0.3rem, 1vh, 0.7rem); }
+  body.landing .hero-sub {
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+    margin-bottom: clamp(0.5rem, 1.6vh, 0.9rem);
+  }
+  body.landing .feature { padding: 0.7rem 0.9rem; }
+  body.landing .feature p { font-size: 0.78rem; line-height: 1.45; }
+  /* the returning-profiles strip is secondary, so it gives up its space first */
+  body.landing .returning h2 { font-size: 0.92rem; margin-bottom: 0.35rem; }
+  body.landing .ret-card { padding: 0.45rem 0.8rem; }
+  body.landing .ret-card .rm { font-size: 0.72rem; }
 }
 
 .ret-card .rn { font-weight: 650; }
