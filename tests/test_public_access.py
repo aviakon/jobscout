@@ -72,6 +72,22 @@ def test_landing_page_lists_nothing_without_a_cookie(client, sqlite_session):
     assert "SomeoneElse" not in resp.text  # no global directory of every user's candidates
 
 
+def test_landing_page_shows_no_profile_history_even_to_its_owner(client, sqlite_session):
+    """The landing page is the pitch, not a dashboard: it lists no past scans
+    even for the browser that created them."""
+    from app.main import PROFILE_COOKIE
+
+    mine = _candidate(sqlite_session, "MyOwnProfile")
+    sqlite_session.commit()
+    client.cookies.set(PROFILE_COOKIE, mine.public_id)
+
+    resp = client.get("/")
+    assert resp.status_code == 200
+    assert "MyOwnProfile" not in resp.text
+    assert mine.public_id not in resp.text
+    assert "המשך מהמקום שעצרת" not in resp.text
+
+
 def test_search_endpoint_is_rate_limited(client, sqlite_session, monkeypatch):
     import app.main as main_module
 

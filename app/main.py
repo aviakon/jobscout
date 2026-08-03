@@ -173,17 +173,13 @@ def _rate_limited(request: Request, key: str, limit: int = 6, window: int = 600)
 # --- landing / onboarding -------------------------------------------------
 
 @app.get("/", response_class=HTMLResponse)
-def home(request: Request, session: Session = Depends(get_session)):
-    tokens = _read_profile_tokens(request)
-    candidates = []
-    if tokens:
-        rows = session.scalars(select(Candidate).where(Candidate.public_id.in_(tokens))).all()
-        by_token = {c.public_id: c for c in rows}
-        candidates = [by_token[t] for t in tokens if t in by_token]  # most-recent first
+def home(request: Request):
+    """The landing page deliberately shows no profile history: it is the first
+    thing a new visitor sees, and a list of past scans belongs to them, not to
+    the pitch. The tokens are still recorded in the cookie, so the list can be
+    brought back without anyone losing access to their results."""
     return templates.TemplateResponse(
-        request,
-        "landing.html",
-        {"candidates": candidates, "has_key": bool(config.ANTHROPIC_API_KEY)},
+        request, "landing.html", {"has_key": bool(config.ANTHROPIC_API_KEY)}
     )
 
 

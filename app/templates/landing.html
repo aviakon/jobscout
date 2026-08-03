@@ -36,17 +36,4 @@
     <p>מכתב מותאם אישית לכל משרה + טיפים לשיפור קורות החיים.</p></div>
 </section>
 
-{% if candidates %}
-<section class="returning" id="returning">
-  <h2>המשך מהמקום שעצרת</h2>
-  <div class="ret-grid">
-    {% for c in candidates %}
-    <a class="ret-card" href="/candidate/{{ c.public_id }}">
-      <span class="rn">{{ c.name or c.resume_filename or "מועמד" }}</span>
-      <span class="rm">{{ c.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
-    </a>
-    {% endfor %}
-  </div>
-</section>
-{% endif %}
 {% endblock %}
