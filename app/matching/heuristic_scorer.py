@@ -55,8 +55,13 @@ def score_one(profile: dict, job: JobPosting) -> dict:
     role_bonus = 0.12 if fam >= 1.0 else 0.0
     role_mult = 1.0 if fam >= 0.7 else fam  # only cross-field roles get multiplied down
 
-    # 2) title alignment
-    title_hit = any(t.lower() in title_lc for t in profile.get("titles", []) if t)
+    # 2) title alignment, in either language — a Hebrew ad for the candidate's
+    # own role must earn the same bonus its English twin would
+    from app.matching import bilingual
+
+    own_titles = [t for t in profile.get("titles", []) if t]
+    title_forms = own_titles + bilingual.expand_all(own_titles)
+    title_hit = any(_contains(title_lc, t) for t in title_forms)
     skill_in_title = any(_contains(title_lc, a)
                          for s in shared for a in skills_db.SKILLS.get(s, [s]))
     title_bonus = 0.14 if title_hit else (0.08 if skill_in_title else 0.0)

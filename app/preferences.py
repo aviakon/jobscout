@@ -255,9 +255,20 @@ def profile_from_preferences(prefs: dict) -> dict:
 
 
 def augment_queries(queries: list[str], prefs: dict) -> list[str]:
+    """Search terms for query-driven sources, in both languages.
+
+    A query-based board is searched by string, so an English-only query set can
+    only ever return English ads. Each term is paired with its Hebrew form (and
+    vice versa) to widen what comes back.
+    """
+    from app.matching import bilingual
+
     roles = [r for r in prefs.get("roles", []) if r]
     out = list(queries)
     for r in roles:
         if r not in out:
             out.append(r)
+    for alt in bilingual.expand_all(out):
+        if alt not in out:
+            out.append(alt)
     return out

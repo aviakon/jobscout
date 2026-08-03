@@ -17,12 +17,20 @@ def _tokens(text: str) -> set[str]:
 
 
 def profile_terms(profile: dict) -> set[str]:
-    """Weighted-ish bag of the candidate's important terms."""
+    """Weighted-ish bag of the candidate's important terms, in both languages.
+
+    Israeli postings are written in English or Hebrew, so the candidate's terms
+    are expanded across both. Without this an English profile scores 0 overlap
+    against a Hebrew ad for the very same role and never reaches the scorer.
+    """
+    from app.matching import bilingual
+
     parts: list[str] = []
     parts += profile.get("skills", [])
     parts += profile.get("titles", [])
     parts += profile.get("industries", [])
     parts.append(profile.get("headline", ""))
+    parts += bilingual.expand_all([p for p in parts if p])
     return _tokens(" ".join(parts))
 
 
