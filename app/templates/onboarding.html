@@ -67,14 +67,20 @@
     <div class="wizard-actions">
       <div class="err-msg" id="step1-err"></div>
       <div class="spacer"></div>
+      <button type="button" class="btn-ghost" id="skip-resume">המשך ללא קורות חיים</button>
       <button type="button" class="btn-primary" id="to-step2">המשך →</button>
     </div>
+    <p class="method-note">אין לכם קורות חיים מוכנים? אפשר להתחיל בלעדיהם ולחפש לפי התפקידים שמעניינים אתכם.</p>
   </section>
   {% endif %}
 
   <!-- STEP 2: PREFERENCES -->
   <section class="card wizard-step {{ 'active' if candidate else '' }}" data-step="2">
     {% set p = prefs or {} %}
+    <div class="noresume-note" id="noresume-note" hidden>
+      📝 ממשיכים ללא קורות חיים. החיפוש יתבסס על התפקידים שתזינו למטה, ולכן צריך לפחות תפקיד אחד.
+      אחרי החיפוש אפשר להוסיף כישורים בפרופיל וההתאמות ישתפרו.
+    </div>
     <div class="pref-group">
       <label class="lbl">שכר חודשי מבוקש (₪)</label>
       <div class="salary-row">
@@ -136,6 +142,7 @@
         <input type="text" id="role-input" placeholder="למשל Backend, ולחצו Enter" autocomplete="off">
       </div>
       <input type="hidden" name="roles" id="roles-hidden" value="{{ (p.roles or [])|join(',') }}">
+      <div class="err-msg" id="roles-err"></div>
     </div>
 
     <div class="wizard-actions">

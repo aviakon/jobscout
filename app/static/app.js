@@ -353,10 +353,32 @@ if (toolbar) {
     });
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
+  // "continue without a resume" — search on the stated roles alone
+  const noResumeNote = document.getElementById("noresume-note");
+  function setNoResume(on) {
+    if (methodInput) methodInput.value = on ? "none" : activeMethod();
+    if (noResumeNote) noResumeNote.hidden = !on;
+  }
+  function activeMethod() {
+    const tab = form.querySelector(".method-tab.active");
+    return tab ? tab.dataset.method : "file";
+  }
+
   const to2 = document.getElementById("to-step2");
   const to1 = document.getElementById("to-step1");
-  if (to2) to2.addEventListener("click", () => { if (validateResume()) goStep(2); });
-  if (to1) to1.addEventListener("click", () => goStep(1));
+  const skip = document.getElementById("skip-resume");
+  if (to2) to2.addEventListener("click", () => {
+    setNoResume(false);
+    if (validateResume()) goStep(2);
+  });
+  if (to1) to1.addEventListener("click", () => { setNoResume(false); goStep(1); });
+  if (skip) skip.addEventListener("click", () => {
+    document.getElementById("step1-err").textContent = "";
+    setNoResume(true);
+    goStep(2);
+    const ri = document.getElementById("role-input");
+    if (ri) setTimeout(() => ri.focus(), 350);
+  });
 
   function validateResume() {
     const err = document.getElementById("step1-err");
@@ -429,18 +451,35 @@ if (toolbar) {
     });
   }
   function sync() { if (rolesHidden) rolesHidden.value = roles.join(","); renderRoles(); }
+  function commitPendingRole() {
+    if (!roleInput) return;
+    const v = roleInput.value.trim();
+    if (v && !roles.includes(v) && roles.length < 6) roles.push(v);
+    roleInput.value = "";
+    sync();
+  }
   if (roleInput) {
     roleInput.addEventListener("keydown", (e) => {
       if (e.key === "Enter" || e.key === ",") {
         e.preventDefault();
-        const v = roleInput.value.trim();
-        if (v && !roles.includes(v) && roles.length < 6) roles.push(v);
-        roleInput.value = "";
-        sync();
+        commitPendingRole();
       }
     });
+    // a role typed but never confirmed with Enter would otherwise be dropped
+    roleInput.addEventListener("blur", commitPendingRole);
     sync();
   }
+
+  form.addEventListener("submit", (e) => {
+    commitPendingRole();
+    if (methodInput && methodInput.value === "none" && roles.length === 0) {
+      e.preventDefault();
+      e.stopPropagation();  // keep the loading overlay from showing
+      const err = document.getElementById("roles-err");
+      if (err) err.textContent = "בלי קורות חיים צריך לפחות תפקיד אחד כדי לדעת מה לחפש.";
+      if (roleInput) roleInput.focus();
+    }
+  });
 })();
 
 // --- Loading overlay for long-running form submits --------------------------

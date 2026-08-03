@@ -203,9 +203,46 @@ async def onboard(
         existing = session.scalar(select(Candidate).where(Candidate.public_id == token))
         if existing is not None:
             existing.preferences_json = json.dumps(prefs, ensure_ascii=False)
+            # A resume-less profile is *derived* from the roles, so changing them
+            # has to rebuild it — otherwise the search keeps chasing the old role.
+            # Skills added by hand are kept; they're the user's own work.
+            profile = existing.profile
+            if profile.get("no_resume") and prefs["roles"]:
+                from app import preferences as prefs_mod
+
+                rebuilt = prefs_mod.profile_from_preferences(prefs)
+                rebuilt["skills"] = profile.get("skills", [])
+                existing.profile_json = json.dumps(rebuilt, ensure_ascii=False)
             session.commit()
             _safe_scan(session, existing)
             return RedirectResponse(f"/candidate/{existing.public_id}", status_code=303)
+
+    # No resume yet: search on the stated roles alone. Those roles are then the
+    # only signal we have, so at least one is required.
+    if resume_method == "none":
+        from app import preferences as prefs_mod
+
+        if not prefs["roles"]:
+            return _onboard_error(
+                request,
+                "בלי קורות חיים צריך לפחות תפקיד אחד כדי לדעת מה לחפש. "
+                "הוסיפו תפקיד בשדה התפקידים ונצא לדרך.",
+            )
+        candidate = Candidate(
+            name="",
+            resume_filename="",
+            resume_text="",
+            profile_json=json.dumps(prefs_mod.profile_from_preferences(prefs), ensure_ascii=False),
+            preferences_json=json.dumps(prefs, ensure_ascii=False),
+            skill_experience_json="{}",
+        )
+        session.add(candidate)
+        session.commit()
+        _safe_scan(session, candidate)
+
+        resp = RedirectResponse(f"/candidate/{candidate.public_id}", status_code=303)
+        _remember_profile(resp, request, candidate.public_id)
+        return resp
 
     # Resolve resume text from the chosen intake method.
     text, fname = "", "resume.txt"

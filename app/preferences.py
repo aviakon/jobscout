@@ -218,6 +218,42 @@ def level_mismatch(job_seniority: str, candidate_level: str, target_level: str =
     return abs(job - cand) >= 2
 
 
+def profile_from_preferences(prefs: dict) -> dict:
+    """Build a search profile for someone who has no resume yet.
+
+    The roles they typed are the only signal we have, so they stand in for the
+    resume's titles and headline — enough for the prefilter, the role-family
+    filter and the seniority filter to do real work. Skills stay empty on
+    purpose: we don't invent a stack the person never claimed. They can add
+    skills by hand on the profile page, and each one sharpens the next search.
+    """
+    from app import config
+
+    roles = [r for r in prefs.get("roles", []) if r][:6]
+    headline = roles[0] if roles else ""
+    listed = ", ".join(roles)
+    return {
+        "name": "",
+        "headline": headline,
+        "seniority": prefs.get("target_level") or "mid",
+        "total_years_experience": 0,
+        "skills": [],
+        "skill_years": {},
+        "experiences": [],
+        "education": [],
+        "titles": roles,
+        "industries": [],
+        "languages": [],
+        "locations": ["Israel"],
+        "remote_pref": prefs.get("remote", "any") or "any",
+        "summary": f"פרופיל לפי העדפות בלבד: {listed}. הוסיפו כישורים כדי לשפר את ההתאמות."
+                   if listed else "",
+        # describes the *scoring* engine, same as a parsed resume would
+        "_engine": "llm" if config.ANTHROPIC_API_KEY else "heuristic",
+        "no_resume": True,
+    }
+
+
 def augment_queries(queries: list[str], prefs: dict) -> list[str]:
     roles = [r for r in prefs.get("roles", []) if r]
     out = list(queries)
