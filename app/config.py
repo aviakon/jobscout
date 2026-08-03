@@ -1,5 +1,6 @@
 """Application settings loaded from environment / .env file."""
 import os
+import secrets
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -48,6 +49,44 @@ def _companies_file() -> Path:
 
 
 COMPANIES_FILE = _companies_file()
+
+
+def _sponsors_file() -> Path:
+    """Paid ad slots, same override rules as the company list."""
+    env = os.getenv("SPONSORS_FILE")
+    if env:
+        return Path(env)
+    local = DATA_DIR / "sponsors.yaml"
+    return local if local.exists() else RESOURCES_DIR / "sponsors.yaml"
+
+
+SPONSORS_FILE = _sponsors_file()
+
+# Site identity + advertising
+SITE_AUTHOR: str = "Avia Konfino"
+CONTACT_EMAIL: str = os.getenv("CONTACT_EMAIL", "avia.konfino@gmail.com")
+AD_SLOTS: int = int(os.getenv("AD_SLOTS", "2"))   # slots above the match list
+
+# Usage analytics. The dashboard is unreachable unless STATS_KEY is set, since
+# the site is public and has no login.
+STATS_KEY: str = os.getenv("STATS_KEY", "")
+# Secret used to hash visitors instead of storing IPs. Persisted (not per-process)
+# so the same person stays the same anonymous id across restarts.
+ANALYTICS_SALT_FILE = DATA_DIR / ".analytics_salt"
+
+
+def analytics_salt() -> str:
+    env = os.getenv("ANALYTICS_SALT")
+    if env:
+        return env
+    try:
+        if ANALYTICS_SALT_FILE.exists():
+            return ANALYTICS_SALT_FILE.read_text(encoding="utf-8").strip()
+        value = secrets.token_hex(16)
+        ANALYTICS_SALT_FILE.write_text(value, encoding="utf-8")
+        return value
+    except OSError:  # read-only fs -> fall back to a per-process salt
+        return secrets.token_hex(16)
 
 # Matching pipeline knobs
 PREFILTER_TOP_N = 90          # jobs scored (wider pool so level/location filters still leave enough)

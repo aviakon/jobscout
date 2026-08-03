@@ -495,3 +495,16 @@ document.addEventListener("submit", (e) => {
     </div>`;
   document.body.appendChild(overlay);
 });
+
+// --- Sponsored ad clicks ----------------------------------------------------
+// Fire-and-forget beacon so the advertiser's link is never delayed by us, and a
+// blocked or failed beacon still lets the click through.
+document.addEventListener("click", (e) => {
+  const link = e.target.closest("a[data-ad]");
+  if (!link) return;
+  const url = `/ad/${encodeURIComponent(link.dataset.ad)}/click`;
+  try {
+    if (navigator.sendBeacon) navigator.sendBeacon(url);
+    else fetch(url, { method: "POST", keepalive: true });
+  } catch (_) { /* never block the click */ }
+});

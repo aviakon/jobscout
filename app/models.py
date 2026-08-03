@@ -74,6 +74,26 @@ class Candidate(Base):
             return {}
 
 
+class Visit(Base):
+    """One recorded usage event: a page view, a scan, or an ad impression/click.
+
+    Deliberately stores no IP address and no raw user agent — `visitor` is a
+    one-way salted hash that rotates daily, which is enough to count people
+    without keeping anything that identifies them.
+    """
+
+    __tablename__ = "visits"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow, index=True)
+    day: Mapped[str] = mapped_column(String(10), index=True)      # YYYY-MM-DD, for grouping
+    kind: Mapped[str] = mapped_column(String(20), index=True)     # page / scan / onboard / ad_view / ad_click
+    path: Mapped[str] = mapped_column(String(300), default="")
+    visitor: Mapped[str] = mapped_column(String(32), default="", index=True)
+    referrer: Mapped[str] = mapped_column(String(300), default="")
+    label: Mapped[str] = mapped_column(String(120), default="")   # ad slug, engine name, ...
+
+
 class Job(Base):
     __tablename__ = "jobs"
     __table_args__ = (UniqueConstraint("dedupe_key", name="uq_jobs_dedupe_key"),)

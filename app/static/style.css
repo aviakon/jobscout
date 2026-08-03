@@ -304,7 +304,7 @@ body.landing .aurora span { opacity: 0.6; }
 body.landing { display: flex; flex-direction: column; min-height: 100dvh; }
 body.landing .full { flex: 1; width: 100%;  /* auto side margins would otherwise shrink it to fit */
   display: flex; flex-direction: column; justify-content: center;
-  gap: clamp(1rem, 3.5vh, 2.4rem); padding-block: clamp(0.5rem, 2vh, 1.5rem); }
+  gap: clamp(0.8rem, 2.6vh, 1.8rem); padding-block: clamp(0.4rem, 1.2vh, 1rem); }
 
 .hero-wrap { display: flex; flex-direction: column; align-items: center;
   justify-content: center; text-align: center; padding: 0 1rem; }
@@ -469,3 +469,63 @@ textarea.resume-text { min-height: 180px; resize: vertical; }
 .pref-edit { margin-inline-start: auto; color: var(--accent); text-decoration: none; font-size: 0.9rem; white-space: nowrap; }
 .fit-badges { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.4rem; }
 .fit-badge { font-size: 0.75rem; background: var(--accent2-soft); color: var(--accent2); border-radius: 6px; padding: 0.1rem 0.5rem; font-weight: 600; }
+
+/* ============================ SITE FOOTER ============================ */
+.site-footer {
+  display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 0.5rem;
+  padding: 1rem 1.2rem; color: var(--muted); font-size: 0.85rem; text-align: center;
+  border-top: 1px solid var(--glass-border); margin-top: 2rem;
+}
+.site-footer b { color: var(--text); font-weight: 600; }
+.site-footer a { color: var(--accent); text-decoration: none; }
+.site-footer a:hover { text-decoration: underline; }
+.foot-sep { opacity: 0.5; }
+/* the landing page budgets its height exactly, so the footer joins the column */
+body.landing .site-footer { margin-top: 0; border-top: 0; padding: 0.5rem 1rem; font-size: 0.8rem; }
+/* must come after the rule above to win on source order */
+@media (max-width: 560px), (max-height: 700px) {
+  body.landing .site-footer { padding: 0.25rem 1rem; font-size: 0.75rem; gap: 0.35rem; }
+}
+
+/* ============================ SPONSORED ADS ============================ */
+.ad-strip { display: grid; gap: 0.8rem; margin-bottom: 0.6rem; }
+.ad-card {
+  position: relative; display: flex; gap: 0.9rem; align-items: flex-start;
+  padding: 1rem 1.1rem; border-radius: 14px;
+  background: linear-gradient(120deg, rgba(255,207,92,0.07), rgba(28,34,60,0.55) 55%);
+  border: 1px solid rgba(255,207,92,0.32);
+}
+.ad-card.house { background: var(--glass); border-style: dashed; border-color: var(--glass-border); }
+.ad-label {
+  position: absolute; top: 0.7rem; inset-inline-end: 0.9rem;
+  font-size: 0.68rem; font-weight: 700; letter-spacing: 0.06em;
+  color: var(--warn); background: rgba(255,207,92,0.12);
+  border: 1px solid rgba(255,207,92,0.35); border-radius: 6px; padding: 0.1rem 0.45rem;
+}
+.ad-card.house .ad-label { color: var(--muted); background: transparent; border-color: var(--glass-border); }
+.ad-logo { font-size: 1.6rem; line-height: 1; flex: none; }
+.ad-body { min-width: 0; flex: 1; }
+.ad-body h3 { margin: 0 0 0.2rem; font-size: 1.02rem; padding-inline-end: 4.2rem; }
+.ad-body h3 a { color: var(--text); text-decoration: none; }
+.ad-body h3 a:hover { color: var(--accent); }
+.ad-meta { color: var(--muted); font-size: 0.85rem; margin-bottom: 0.25rem; }
+.ad-meta strong { color: var(--text); }
+.ad-body p { margin: 0; color: var(--muted); font-size: 0.88rem; line-height: 1.5; }
+.ad-note { margin: 0 0 1rem; }
+
+/* ============================ STATS DASHBOARD ============================ */
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 0.9rem; }
+.stat-box { background: var(--card2); border: 1px solid var(--border); border-radius: 12px; padding: 0.9rem 1rem; }
+.sb-title { display: block; color: var(--muted); font-size: 0.8rem; margin-bottom: 0.5rem; letter-spacing: 0.04em; }
+.sb-rows { display: flex; flex-direction: column; gap: 0.25rem; font-size: 0.9rem; color: var(--muted); }
+.sb-rows b { color: var(--text); font-size: 1.15rem; font-weight: 700; margin-inline-end: 0.25rem; }
+.spark { display: flex; align-items: flex-end; gap: 2px; height: 130px; direction: ltr;
+  padding: 0.4rem; background: var(--card2); border: 1px solid var(--border); border-radius: 12px; }
+.spark-bar { flex: 1; min-width: 3px; border-radius: 3px 3px 0 0;
+  background: linear-gradient(180deg, var(--accent), #8a6cff); opacity: 0.9; }
+.spark-bar:hover { opacity: 1; background: var(--accent2); }
+.spark-axis { display: flex; justify-content: space-between; color: var(--muted); font-size: 0.78rem; margin-top: 0.4rem; direction: ltr; }
+.stats-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+.stats-table th, .stats-table td { text-align: start; padding: 0.45rem 0.6rem; border-bottom: 1px solid var(--border); }
+.stats-table th { color: var(--muted); font-weight: 600; font-size: 0.82rem; }
+.stats-table tbody tr:last-child td { border-bottom: 0; }

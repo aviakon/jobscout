@@ -29,6 +29,13 @@ def test_onboarding_page_has_no_dashes(client):
     assert _no_dashes(resp.text)
 
 
+def test_stats_dashboard_has_no_dashes(client, monkeypatch):
+    from app import config
+
+    monkeypatch.setattr(config, "STATS_KEY", "k")
+    assert _no_dashes(client.get("/stats/k").text)
+
+
 def test_candidate_page_has_no_dashes(client, sqlite_session):
     c = Candidate(name="Tester", resume_filename="t.txt", resume_text="x",
                   profile_json=json.dumps({"skills": ["Python"], "seniority": "mid"}))

@@ -4,6 +4,8 @@ __pycache__/
 data/jobscout.db
 data/uploads/
 data/digests/
+data/sponsors.yaml
+data/.analytics_salt
 .pytest_cache/
 .venv/
 venv/

@@ -9,15 +9,16 @@ from __future__ import annotations
 
 import json
 import logging
+import secrets
 
 from fastapi import Depends, FastAPI, File, Form, HTTPException, Request, UploadFile
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from sqlalchemy import desc, select
 from sqlalchemy.orm import Session
 
-from app import config, ratelimit
+from app import ads, analytics, config, db, ratelimit
 from app.db import get_session, init_db
 from app.models import Candidate, Match
 from app.pipeline import run_for_candidate
@@ -34,6 +35,11 @@ logging.basicConfig(level=logging.INFO)
 app = FastAPI(title="JobScout")
 BASE = config.BASE_DIR / "app"
 templates = Jinja2Templates(directory=str(BASE / "templates"))
+# Available to every template (the footer credit on all pages needs them)
+templates.env.globals.update(
+    site_author=config.SITE_AUTHOR,
+    contact_email=config.CONTACT_EMAIL,
+)
 app.mount("/static", StaticFiles(directory=str(BASE / "static")), name="static")
 
 PROFILE_COOKIE = "jobscout_profiles"
@@ -66,6 +72,25 @@ def _startup() -> None:
         )
 
 
+@app.middleware("http")
+async def _track_page_views(request: Request, call_next):
+    """Record page views for the usage dashboard. Wrapped so analytics can
+    never turn a working page into an error."""
+    response = await call_next(request)
+    try:
+        if (request.method == "GET" and response.status_code < 400
+                and analytics.should_track(request.url.path)
+                and "text/html" in response.headers.get("content-type", "")):
+            session = db.new_session()
+            try:
+                analytics.record(session, kind="page", request=request)
+            finally:
+                session.close()
+    except Exception as e:  # noqa: BLE001
+        logging.warning("page-view tracking failed: %s", e)
+    return response
+
+
 @app.get("/healthz")
 def healthz():
     """Liveness + a quick answer to 'why did the search find nothing?'."""
@@ -80,6 +105,22 @@ def healthz():
         "aggregator": bool(config.RAPIDAPI_KEY),
         "engine": "llm" if config.ANTHROPIC_API_KEY else "heuristic",
     }
+
+
+@app.get("/stats/{key}", response_class=HTMLResponse)
+def stats_dashboard(key: str, request: Request, session: Session = Depends(get_session)):
+    """Private usage dashboard.
+
+    The site is public and has no login, so this is gated by a secret key held
+    in the STATS_KEY environment variable. With no key set the route does not
+    exist at all — that way an unconfigured deploy can never leak the numbers,
+    and a wrong guess is indistinguishable from a missing page.
+    """
+    if not config.STATS_KEY or not secrets.compare_digest(key, config.STATS_KEY):
+        raise HTTPException(404)
+    return templates.TemplateResponse(
+        request, "stats.html", {"s": analytics.summary(session), "key": key}
+    )
 
 
 # --- small helpers ------------------------------------------------------------
@@ -238,6 +279,7 @@ async def onboard(
         )
         session.add(candidate)
         session.commit()
+        analytics.record(session, kind="onboard", request=request, label="no_resume")
         _safe_scan(session, candidate)
 
         resp = RedirectResponse(f"/candidate/{candidate.public_id}", status_code=303)
@@ -282,6 +324,7 @@ async def onboard(
     )
     session.add(candidate)
     session.commit()
+    analytics.record(session, kind="onboard", request=request, label=resume_method or "file")
     _safe_scan(session, candidate)
 
     resp = RedirectResponse(f"/candidate/{candidate.public_id}", status_code=303)
@@ -305,6 +348,8 @@ def search(token: str, request: Request, location: str = Form("Israel"), session
         return HTMLResponse(RATE_LIMIT_HTML, status_code=429)
     summary = run_for_candidate(session, candidate, location=location)
     logging.info("search summary: %s", summary)
+    analytics.record(session, kind="scan", request=request, path=f"/candidate/{token}",
+                     label=str(summary.get("engine", "")))
     return RedirectResponse(f"/candidate/{token}", status_code=303)
 
 
@@ -325,19 +370,33 @@ def candidate_view(token: str, request: Request, session: Session = Depends(get_
         m.source_label = prefs_mod.source_label(m.job)
         m.from_company_board = prefs_mod.source_is_company_board(m.job)
 
+    profile = candidate.profile
+    ad_slots = ads.slots_for(profile)
+    for ad in ad_slots:
+        analytics.record(session, kind="ad_view", request=request, label=ad.slug)
+
     return templates.TemplateResponse(
         request,
         "candidate.html",
         {
             "candidate": candidate,
-            "profile": candidate.profile,
+            "profile": profile,
             "matches": matches,
+            "ads": ad_slots,
             "all_skills": list(skills_db.SKILLS.keys()),
             "preferences": prefs,
             # LinkedIn/Indeed coverage comes via the JSearch aggregator, which needs a key
             "has_aggregator": bool(config.RAPIDAPI_KEY),
         },
     )
+
+
+@app.post("/ad/{slug}/click")
+def ad_click(slug: str, request: Request, session: Session = Depends(get_session)):
+    """Click beacon for the ad strip. Returns nothing: the browser follows the
+    real link itself, so a slow or failed beacon never blocks the advertiser."""
+    analytics.record(session, kind="ad_click", request=request, label=slug[:120])
+    return Response(status_code=204)
 
 
 @app.post("/candidate/{token}/match/{match_id}/status")

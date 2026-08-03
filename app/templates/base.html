@@ -20,6 +20,11 @@
   <main class="{% block main_class %}container{% endblock %}">
     {% block content %}{% endblock %}
   </main>
+  <footer class="site-footer">
+    <span>נבנה על ידי <b>{{ site_author }}</b></span>
+    <span class="foot-sep">·</span>
+    <a href="mailto:{{ contact_email }}?subject=פרסום%20באתר%20JobScout">לפרסום באתר</a>
+  </footer>
   <script src="/static/app.js"></script>
 </body>
 </html>

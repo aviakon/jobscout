@@ -64,3 +64,10 @@ def get_session():
         yield session
     finally:
         session.close()
+
+
+def new_session():
+    """A standalone session for code that runs outside the request dependency
+    (the analytics middleware). Kept as an indirection so tests can point it at
+    their in-memory database instead of the real one."""
+    return SessionLocal()

@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %}נתוני שימוש: JobScout{% endblock %}
+
+{% block content %}
+<div class="onb-head">
+  <h1>📈 נתוני שימוש</h1>
+  <p class="muted">
+    {% if s.first_day %}נאסף מאז {{ s.first_day }}{% else %}עדיין לא נאספו נתונים{% endif %}
+  </p>
+</div>
+
+<section class="card">
+  <h2>סיכום</h2>
+  <div class="stats-grid">
+    {% for label, w in [('היום', s.today), ('7 ימים', s.week), ('30 ימים', s.month), ('מאז ההתחלה', s.all_time)] %}
+    <div class="stat-box">
+      <span class="sb-title">{{ label }}</span>
+      <div class="sb-rows">
+        <div><b>{{ w.visitors }}</b> מבקרים</div>
+        <div><b>{{ w.views }}</b> צפיות בדפים</div>
+        <div><b>{{ w.profiles }}</b> פרופילים חדשים</div>
+        <div><b>{{ w.scans }}</b> סריקות</div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="card">
+  <h2>30 הימים האחרונים</h2>
+  {% if s.peak %}
+  <div class="spark" role="img" aria-label="גרף צפיות יומיות ב 30 הימים האחרונים">
+    {% for d in s.series %}
+    <span class="spark-bar" style="height: {{ (4 + (d.views / s.peak) * 96)|round(1) }}%"
+          title="{{ d.day }}: {{ d.views }} צפיות, {{ d.visitors }} מבקרים"></span>
+    {% endfor %}
+  </div>
+  <div class="spark-axis"><span>{{ s.series[0].day }}</span><span>שיא יומי: {{ s.peak }}</span><span>{{ s.series[-1].day }}</span></div>
+  {% else %}
+  <p class="muted">אין עדיין תנועה להצגה.</p>
+  {% endif %}
+</section>
+
+<section class="card">
+  <h2>📣 ביצועי מודעות</h2>
+  {% if s.ads %}
+  <table class="stats-table">
+    <thead><tr><th>מודעה</th><th>הצגות</th><th>קליקים</th><th>אחוז הקלקה</th></tr></thead>
+    <tbody>
+      {% for a in s.ads %}
+      <tr>
+        <td>{{ a.slug }}{% if a.slug.startswith('house-') %} <span class="muted small">(מקום פנוי)</span>{% endif %}</td>
+        <td>{{ a.views }}</td><td>{{ a.clicks }}</td><td>{{ a.ctr }}%</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <p class="muted small">אלה המספרים שמפרסם ישאל עליהם. שורות שמתחילות ב house הן משבצות שעדיין לא נמכרו.</p>
+  {% else %}
+  <p class="muted">עדיין אין נתוני מודעות.</p>
+  {% endif %}
+</section>
+
+<section class="card">
+  <h2>דפים מובילים</h2>
+  {% if s.top_pages %}
+  <table class="stats-table">
+    <thead><tr><th>דף</th><th>צפיות</th></tr></thead>
+    <tbody>
+      {% for p in s.top_pages %}<tr><td dir="ltr">{{ p.path }}</td><td>{{ p.n }}</td></tr>{% endfor %}
+    </tbody>
+  </table>
+  {% else %}<p class="muted">אין נתונים.</p>{% endif %}
+</section>
+
+<section class="card">
+  <h2>מאיפה הגיעו</h2>
+  {% if s.referrers %}
+  <table class="stats-table">
+    <thead><tr><th>מקור</th><th>כניסות</th></tr></thead>
+    <tbody>
+      {% for r in s.referrers %}<tr><td dir="ltr">{{ r.src }}</td><td>{{ r.n }}</td></tr>{% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="muted">כל הכניסות היו ישירות, בלי אתר מפנה.</p>
+  {% endif %}
+</section>
+
+<p class="muted small">
+  הנתונים נאספים אצלנו בלבד, בלי שירות חיצוני ובלי עוגיות מעקב. לא נשמרות כתובות IP:
+  מבקר מזוהה בגיבוב חד כיווני שמתחלף כל יום, שמאפשר לספור אנשים בלי לזהות אותם.
+</p>
+{% endblock %}

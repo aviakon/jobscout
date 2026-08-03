@@ -158,6 +158,33 @@
     <p class="muted">עדיין אין תוצאות. לחץ "חפש משרות עכשיו" למעלה.</p>
   {% endif %}
 
+  {% if ads %}
+  <div class="ad-strip">
+    {% for ad in ads %}
+    <article class="ad-card{{ ' house' if ad.is_house_ad else '' }}">
+      <span class="ad-label">ממומן</span>
+      <div class="ad-logo">{{ ad.logo or '🏢' }}</div>
+      <div class="ad-body">
+        <h3>
+          {% if ad.url %}
+          <a href="{{ ad.url }}" data-ad="{{ ad.slug }}"
+             {% if not ad.url.startswith('mailto:') %}target="_blank" rel="noopener sponsored"{% endif %}>{{ ad.title }}</a>
+          {% else %}{{ ad.title }}{% endif %}
+        </h3>
+        {% if ad.company or ad.location %}
+        <div class="ad-meta">
+          {% if ad.company %}<strong>{{ ad.company }}</strong>{% endif %}
+          {% if ad.location %}{{ '· ' if ad.company }}{{ ad.location }}{% endif %}
+        </div>
+        {% endif %}
+        {% if ad.body %}<p>{{ ad.body }}</p>{% endif %}
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+  <p class="ad-note muted small">מודעות ממומנות מסומנות בתווית ואינן חלק מהדירוג. הן לא נסרקו ולא קיבלו ציון מול הפרופיל שלך.</p>
+  {% endif %}
+
   {% if matches %}
   <div class="toolbar" id="matches-toolbar">
     <label>מיון:

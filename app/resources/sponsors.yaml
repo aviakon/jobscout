@@ -1,0 +1,38 @@
+# Paid ad slots shown above the job matches.
+#
+# Every entry here fills one of the sponsored slots, in order. Slots that are
+# not sold show a house ad inviting companies to get in touch, so you never
+# need to keep this file full.
+#
+# To sell a slot, add an entry and redeploy (or drop a copy of this file at
+# data/sponsors.yaml, which overrides this one without a redeploy).
+#
+# Fields:
+#   slug     required, short id, used in the click/impression stats
+#   title    required, the headline of the ad
+#   company  advertiser name, shown under the title
+#   body     one or two sentences
+#   url      where the ad links to
+#   location optional, e.g. "תל אביב"
+#   logo     one emoji (no external images, so nothing slows the page down)
+#   roles    optional targeting: show only to people whose profile mentions
+#            one of these words, e.g. ["backend", "devops"]. Omit to show to
+#            everyone.
+#   starts_on / ends_on   optional campaign window, YYYY-MM-DD
+#   active   set to false to pause an ad without deleting it
+#
+# Example of a sold slot:
+#
+# sponsors:
+#   - slug: acme-2026-08
+#     title: מחפשים מפתחי Backend
+#     company: Acme
+#     body: צוות חדש, סטאק Python ו AWS, משרה היברידית במרכז.
+#     url: https://acme.example.com/careers
+#     location: תל אביב
+#     logo: 🚀
+#     roles: [backend, python]
+#     starts_on: 2026-08-01
+#     ends_on: 2026-09-01
+
+sponsors: []

@@ -9,7 +9,7 @@ from app import models  # noqa: F401  (register tables on Base.metadata)
 
 
 @pytest.fixture
-def sqlite_session():
+def sqlite_session(monkeypatch):
     """Fresh in-memory SQLite session per test.
 
     StaticPool is required here: the FastAPI TestClient (used by the `client`
@@ -24,6 +24,14 @@ def sqlite_session():
     )
     Base.metadata.create_all(engine)
     Session = sessionmaker(bind=engine, expire_on_commit=False)
+
+    # The analytics middleware runs outside the request dependency and opens its
+    # own session; point that at this in-memory database too, so a test run can
+    # never write page views into the real data/jobscout.db.
+    import app.db as db_module
+
+    monkeypatch.setattr(db_module, "new_session", Session)
+
     session = Session()
     try:
         yield session
