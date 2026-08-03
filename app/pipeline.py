@@ -28,7 +28,10 @@ def build_queries(profile: dict) -> list[str]:
     if not queries and profile.get("headline"):
         queries.append(profile["headline"])
     queries = queries or default_queries()
-    return prefs_mod.augment_queries(queries, profile.get("preferences", {}))
+    queries = prefs_mod.augment_queries(queries, profile.get("preferences", {}))
+    # Hard budget: every query costs a billed request on the aggregator's free
+    # tier, and bilingual expansion can easily triple the list.
+    return queries[: max(1, config.JSEARCH_MAX_QUERIES)]
 
 
 def fetch_all(profile: dict, location: str = "Israel") -> list[JobPosting]:

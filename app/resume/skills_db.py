@@ -48,12 +48,12 @@ SKILLS: dict[str, list[str]] = {
     "Camunda": ["camunda", "zeebe"],
     # data / ML
     "AI": ["ai", "artificial intelligence", "gen ai", "generative ai", "genai",
-           "בינה מלאכותית", "בינה"],
+           "בינה מלאכותית"],
     "Machine Learning": ["machine learning", "ml", "למידת מכונה", "לימוד מכונה"],
     "Deep Learning": ["deep learning", "dl", "למידה עמוקה"],
     "NLP": ["nlp", "natural language", "עיבוד שפה טבעית"],
     "Computer Vision": ["computer vision", "opencv", "ראייה ממוחשבת", "ראיה ממוחשבת"],
-    "LLM": ["llm", "large language model", "prompt engineering", "rag", "מודל שפה"],
+    "LLM": ["llm", "large language model", "gpt", "prompt engineering", "rag", "מודל שפה"],
     "Algorithms": ["algorithms", "algorithm engineer", "אלגוריתמים", "אלגוריתמיקה"],
     "PyTorch": ["pytorch", "torch"],
     "TensorFlow": ["tensorflow", "keras"],
@@ -64,7 +64,6 @@ SKILLS: dict[str, list[str]] = {
     "Kafka": ["kafka"],
     "Data Engineering": ["data engineering", "etl", "data pipeline", "הנדסת נתונים"],
     "Data Science": ["data science", "data scientist", "מדעני נתונים", "מדע הנתונים"],
-    "LLM": ["llm", "large language model", "gpt", "generative ai", "genai"],
     # databases
     "PostgreSQL": ["postgres", "postgresql"],
     "MySQL": ["mysql", "mariadb"],

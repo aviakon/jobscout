@@ -268,7 +268,21 @@ def augment_queries(queries: list[str], prefs: dict) -> list[str]:
     for r in roles:
         if r not in out:
             out.append(r)
-    for alt in bilingual.expand_all(out):
-        if alt not in out:
-            out.append(alt)
-    return out
+
+    # Interleave each query with its own best counterpart, so that when the list
+    # is later capped to a request budget the top query keeps its translation
+    # instead of losing it to the second query's. Prefer specific phrases:
+    # "בינה מלאכותית" finds AI roles, while "מהנדס" alone matches every
+    # engineering ad in the country and wastes a billed request.
+    paired: list[str] = []
+    for q in out:
+        paired.append(q)
+        alts = sorted(bilingual.expand(q), key=lambda a: len(a.split()), reverse=True)
+        for alt in alts[:1]:
+            if alt not in paired and alt not in out:
+                paired.append(alt)
+    for q in out:  # any remaining counterparts, after the priority pairs
+        for alt in bilingual.expand(q):
+            if alt not in paired:
+                paired.append(alt)
+    return paired

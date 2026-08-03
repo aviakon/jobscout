@@ -18,7 +18,7 @@ from __future__ import annotations
 # "ai" are safe (they will not fire inside "email" or "training").
 GLOSSARY: dict[str, list[str]] = {
     # --- AI / data ---------------------------------------------------------
-    "ai": ["בינה מלאכותית", "בינה"],
+    "ai": ["בינה מלאכותית"],
     "artificial intelligence": ["בינה מלאכותית"],
     "machine learning": ["למידת מכונה", "לימוד מכונה", "למידת מכונה"],
     "deep learning": ["למידה עמוקה"],

@@ -112,6 +112,12 @@ def analytics_salt() -> str:
     except OSError:  # read-only fs -> fall back to a per-process salt
         return secrets.token_hex(16)
 
+# JSearch (optional aggregator) budget. Its free tier is ~200 requests/month and
+# every page of every query costs one, so an unbounded query list burns the whole
+# month in a handful of scans. Raise these if you are on a paid plan.
+JSEARCH_MAX_QUERIES = int(os.getenv("JSEARCH_MAX_QUERIES", "4"))
+JSEARCH_PAGES = int(os.getenv("JSEARCH_PAGES", "1"))
+
 # Matching pipeline knobs
 PREFILTER_TOP_N = 90          # jobs scored (wider pool so level/location filters still leave enough)
 SCORER_MAX_CONCURRENCY = 5    # parallel Claude calls

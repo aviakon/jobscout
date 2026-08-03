@@ -108,6 +108,31 @@ def test_ai_is_recognised_as_a_skill_at_all():
     assert "AI" in extract_skills(_lc("מהנדס בינה מלאכותית עם ניסיון"))
 
 
+def test_hebrew_prefixes_do_not_hide_a_match():
+    """Hebrew glues ו/ב/ל/ה onto the next word, so "machine learning" appears as
+    "ולמידת מכונה" and "Python" as "בפייתון". Plain boundary matching misses both."""
+    from app.resume.heuristic import _lc, extract_skills
+
+    found = extract_skills(_lc("דרוש מהנדס לבינה מלאכותית עם ניסיון בפייתון ולמידת מכונה"))
+    assert {"AI", "Python", "Machine Learning"} <= set(found), found
+
+
+def test_the_prefix_rule_does_not_invent_matches():
+    """"מבינה" means "understands"; it must not read as מ + בינה."""
+    from app.resume.heuristic import _lc, extract_skills
+
+    assert "AI" not in extract_skills(_lc("היא מבינה את הבעיה ולא צריכה עזרה"))
+
+
+def test_the_skill_vocabulary_has_no_duplicate_keys():
+    """A repeated key silently overwrites the earlier one and drops its aliases."""
+    import re
+
+    with open("app/resume/skills_db.py", encoding="utf-8") as f:
+        keys = re.findall(r'^    "([^"]+)":', f.read(), re.M)
+    assert len(keys) == len(set(keys)), [k for k in keys if keys.count(k) > 1]
+
+
 def test_ai_does_not_fire_inside_ordinary_words():
     """A two letter alias is the classic false positive; boundaries must hold."""
     from app.resume.heuristic import _lc, extract_skills

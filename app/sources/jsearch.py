@@ -17,9 +17,10 @@ log = logging.getLogger(__name__)
 class JSearchConnector(Connector):
     name = "jsearch"
 
-    def __init__(self, api_key: str | None = None, pages: int = 3):
+    def __init__(self, api_key: str | None = None, pages: int | None = None):
         self.api_key = api_key or config.RAPIDAPI_KEY
-        self.pages = pages
+        # each page is a separate billed request on the free tier
+        self.pages = config.JSEARCH_PAGES if pages is None else pages
 
     def fetch(self, query: str, location: str = "Israel") -> list[JobPosting]:
         if not self.api_key:

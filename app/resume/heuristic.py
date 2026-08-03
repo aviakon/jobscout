@@ -20,6 +20,13 @@ def _lc(text: str) -> str:
 _BOUND = r"[a-z0-9֐-׿]"
 _PATTERN_CACHE: dict[str, "re.Pattern | None"] = {}
 
+# Hebrew glues its prepositions and conjunctions straight onto the next word, so
+# "machine learning" appears as "ולמידת מכונה" and "Python" as "בפייתון". A plain
+# word-boundary match misses every one of those. Allowing a short prefix cluster
+# is safe because a boundary is still required in front of it.
+_HE_PREFIX = r"(?:[ובלמשכה]{1,2})?"
+_HEBREW_CHAR = re.compile(r"[֐-׿]")
+
 
 def _pattern_for(needle: str) -> "re.Pattern | None":
     needle = needle.strip().lower()
@@ -30,6 +37,9 @@ def _pattern_for(needle: str) -> "re.Pattern | None":
             pat = re.compile(needle)
         except re.error:
             pat = None
+    elif _HEBREW_CHAR.match(needle):
+        # Hebrew needle: allow an attached prefix ("ולמידת מכונה" -> "למידת מכונה")
+        pat = re.compile(rf"(?<!{_BOUND}){_HE_PREFIX}{re.escape(needle)}(?!{_BOUND})")
     else:
         # whole-token match so "scala" != "scalable", "ui" != "building"
         pat = re.compile(rf"(?<!{_BOUND}){re.escape(needle)}(?!{_BOUND})")
