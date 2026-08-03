@@ -93,9 +93,11 @@ def house_ad(index: int = 0) -> Ad:
         slug=f"house-{index}",
         title="רוצים לפרסם כאן?",
         company="",
-        body=f"המקום הזה פנוי למודעות של חברות. מחפשים מועמדים? כתבו לי ל {config.CONTACT_EMAIL} "
-             f"והמודעה שלכם תופיע כאן, ראשונה, מול כל מי שמחפש עבודה.",
-        url=f"mailto:{config.CONTACT_EMAIL}?subject=פרסום באתר JobScout",
+        body="המקום הזה פנוי למודעות של חברות. מחפשים מועמדים? השאירו פרטים "
+             "והמודעה שלכם תופיע כאן, ראשונה, מול כל מי שמחפש עבודה.",
+        # an on-site form, not a mailto: a mail link silently does nothing for
+        # visitors whose browser has no mail client, and loses the lead
+        url="/advertise",
         logo="📣",
         paid=False,
     )

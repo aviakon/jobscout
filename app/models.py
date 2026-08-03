@@ -94,6 +94,26 @@ class Visit(Base):
     label: Mapped[str] = mapped_column(String(120), default="")   # ad slug, engine name, ...
 
 
+class AdInquiry(Base):
+    """A company asking to advertise, submitted through /advertise.
+
+    Kept on the site rather than sent as mail, so a lead is never lost to a
+    visitor whose browser has no mail client. Readable only through the
+    key-protected stats dashboard: these are real people's contact details.
+    """
+
+    __tablename__ = "ad_inquiries"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow, index=True)
+    company: Mapped[str] = mapped_column(String(200), default="")
+    contact_name: Mapped[str] = mapped_column(String(200), default="")
+    email: Mapped[str] = mapped_column(String(320), default="")
+    phone: Mapped[str] = mapped_column(String(60), default="")
+    message: Mapped[str] = mapped_column(Text, default="")
+    handled: Mapped[bool] = mapped_column(Integer, default=0)  # SQLite has no bool
+
+
 class Job(Base):
     __tablename__ = "jobs"
     __table_args__ = (UniqueConstraint("dedupe_key", name="uq_jobs_dedupe_key"),)

@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}פרסום באתר: JobScout{% endblock %}
+{% block main_class %}onb{% endblock %}
+
+{% block content %}
+{% if sent %}
+<div class="onb-head">
+  <h1>✅ הפנייה נשלחה</h1>
+  <p class="muted">תודה. הפרטים הגיעו אליי ואחזור אליכם בהקדם.</p>
+</div>
+<section class="card">
+  <p>רוצים להוסיף משהו? אפשר גם לכתוב ישירות ל
+    <a href="mailto:{{ contact_email }}?subject=פרסום באתר JobScout">{{ contact_email }}</a>.</p>
+  <div class="wizard-actions">
+    <div class="spacer"></div>
+    <a href="/" class="btn-primary">← חזרה לדף הבית</a>
+  </div>
+</section>
+{% else %}
+
+{% if error %}<div class="onb-error">⚠️ {{ error }}</div>{% endif %}
+
+<div class="onb-head">
+  <h1>📣 פרסום באתר</h1>
+  <p class="muted">מחפשים מועמדים? המודעה שלכם תופיע בראש רשימת המשרות,
+    מול אנשים שכבר מחפשים עבודה בתחום שלכם.</p>
+</div>
+
+<section class="card">
+  <div class="ad-pitch">
+    <div><span class="ap-ico">🎯</span><b>קהל ממוקד</b><p>המודעה מוצגת למי שהעלה קורות חיים ומחפש עבודה עכשיו.</p></div>
+    <div><span class="ap-ico">📊</span><b>דיווח שקוף</b><p>תקבלו מספרי הצגות והקלקות אמיתיים על המודעה שלכם.</p></div>
+    <div><span class="ap-ico">⚡</span><b>העלאה מהירה</b><p>שולחים פרטים, מסכמים, והמודעה עולה.</p></div>
+  </div>
+</section>
+
+<form action="/advertise" method="post">
+  <section class="card">
+    {% set f = form or {} %}
+    <div class="pref-group">
+      <label class="lbl" for="company">שם החברה <span class="req">*</span></label>
+      <input type="text" id="company" name="company" value="{{ f.company or '' }}"
+             maxlength="200" required autocomplete="organization">
+    </div>
+
+    <div class="pref-group">
+      <label class="lbl" for="contact_name">איש קשר</label>
+      <input type="text" id="contact_name" name="contact_name" value="{{ f.contact_name or '' }}"
+             maxlength="200" autocomplete="name">
+    </div>
+
+    <div class="pref-group">
+      <label class="lbl" for="email">אימייל</label>
+      <input type="email" id="email" name="email" value="{{ f.email or '' }}"
+             maxlength="320" autocomplete="email" placeholder="name@company.com">
+    </div>
+
+    <div class="pref-group">
+      <label class="lbl" for="phone">טלפון</label>
+      <input type="tel" id="phone" name="phone" value="{{ f.phone or '' }}"
+             maxlength="60" autocomplete="tel" placeholder="050-0000000">
+      <p class="method-note">צריך אימייל או טלפון, לפחות אחד מהם, כדי שנוכל לחזור אליכם.</p>
+    </div>
+
+    <div class="pref-group">
+      <label class="lbl" for="message">מה תרצו לפרסם?</label>
+      <textarea id="message" name="message" class="resume-text" maxlength="4000"
+                placeholder="למשל: מגייסים מפתחי Backend למשרה היברידית במרכז.">{{ f.message or '' }}</textarea>
+    </div>
+
+    <!-- honeypot: hidden from people, tempting to bots -->
+    <div class="hp" aria-hidden="true">
+      <label for="website">אל תמלאו שדה זה</label>
+      <input type="text" id="website" name="website" tabindex="-1" autocomplete="off">
+    </div>
+
+    <div class="wizard-actions">
+      <div class="spacer"></div>
+      <button type="submit" class="btn-primary">שליחת פרטים</button>
+    </div>
+    <p class="method-note">הפרטים נשמרים אצלנו בלבד ומשמשים רק כדי לחזור אליכם בעניין הפרסום.</p>
+  </section>
+</form>
+{% endif %}
+{% endblock %}

@@ -27,8 +27,9 @@ def test_with_nothing_sold_there_is_exactly_one_invitation(sponsors_file):
     slots = ads.slots_for()
     assert len(slots) == 1
     assert slots[0].is_house_ad
-    assert config.CONTACT_EMAIL in slots[0].body
-    assert slots[0].url.startswith("mailto:")
+    # an on-site form, not a mail link: mailto silently does nothing for a
+    # visitor whose browser has no mail client, and the lead is simply lost
+    assert slots[0].url == "/advertise"
 
 
 def test_a_paid_ad_takes_the_first_slot(sponsors_file):

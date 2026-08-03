@@ -39,10 +39,19 @@ def test_every_page_credits_the_author(pages):
         assert config.SITE_AUTHOR in resp.text, f"missing credit on {url}"
 
 
-def test_every_page_offers_the_advertising_contact(pages):
+def test_every_page_offers_a_way_to_advertise(pages):
     client, urls = pages
     for url in urls:
-        assert config.CONTACT_EMAIL in client.get(url).text, f"missing contact on {url}"
+        assert 'href="/advertise"' in client.get(url).text, f"missing advertise link on {url}"
+
+
+def test_the_advertise_page_still_shows_the_email_as_a_fallback(client):
+    """The form is the main route, but someone who prefers mail must still be
+    able to reach the address."""
+    resp = client.post("/advertise", data={"company": "Acme", "email": "x@acme.com"},
+                       headers={"X-Forwarded-For": "198.51.100.7"}, follow_redirects=True)
+    assert resp.status_code == 200
+    assert config.CONTACT_EMAIL in resp.text
 
 
 def test_the_stats_dashboard_is_credited_too(client, monkeypatch):

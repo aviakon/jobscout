@@ -82,8 +82,13 @@ def run_for_candidate(session: Session, candidate: Candidate, location: str = "I
     profile["skill_experience"] = candidate.skill_experience
     profile["preferences"] = prefs
     # a desired target level steers the scorer's seniority alignment
-    if prefs.get("target_level"):
-        profile["seniority"] = prefs["target_level"]
+    wanted_levels = prefs_mod.get_target_levels(prefs)
+    # One wanted level is a clear statement of where they see themselves, so it
+    # replaces the resume-derived seniority for scoring. Several levels are a
+    # widening of the search, not a new self-assessment, so the resume's own
+    # level is kept and the list is used only as a filter.
+    if len(wanted_levels) == 1:
+        profile["seniority"] = wanted_levels[0]
     postings = fetch_all(profile, location=location)
 
     shortlist = prefilter.rank(profile, postings, config.PREFILTER_TOP_N)
@@ -107,7 +112,7 @@ def run_for_candidate(session: Session, candidate: Candidate, location: str = "I
     from app.resume.heuristic import _lc
 
     cand_level = profile.get("seniority", "mid")
-    target_level = prefs.get("target_level", "")
+    target_level = wanted_levels
     cand_fams = roles.candidate_families(profile)
 
     ranked = sorted(zip(shortlist, scores), key=lambda x: x[1]["score"], reverse=True)

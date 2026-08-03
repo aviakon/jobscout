@@ -24,6 +24,19 @@ REGION_CITIES: dict[str, list[str]] = {
 _LEVEL_RANK = {"intern": 0, "junior": 1, "mid": 2, "senior": 3, "lead": 4, "manager": 5, "director": 6}
 
 
+def get_target_levels(prefs: dict) -> list[str]:
+    """Wanted seniority levels. Empty means no constraint.
+
+    Accepts the new `target_levels` list and the legacy `target_level` string,
+    so profiles saved before multi-select keep working.
+    """
+    levels = prefs.get("target_levels")
+    if levels is None:
+        one = prefs.get("target_level")
+        levels = [one] if one else []
+    return [lv for lv in levels if lv]
+
+
 def get_regions(prefs: dict) -> list[str]:
     """Selected work regions as a list. Empty / 'all' means no constraint.
 
@@ -75,13 +88,18 @@ def remote_matches(job_remote, pref: str) -> bool | None:
     return None
 
 
-def level_matches(job_seniority: str, target_level: str) -> bool | None:
-    if not target_level:
+def level_matches(job_seniority: str, target_level: str | list[str]) -> bool | None:
+    targets = [target_level] if isinstance(target_level, str) else list(target_level or [])
+    targets = [lv for lv in targets if lv]
+    if not targets:
         return None
-    a, b = _LEVEL_RANK.get(job_seniority), _LEVEL_RANK.get(target_level)
-    if a is None or b is None:
+    a = _LEVEL_RANK.get(job_seniority)
+    if a is None:
         return None
-    return abs(a - b) <= 1
+    ranks = [_LEVEL_RANK[lv] for lv in targets if lv in _LEVEL_RANK]
+    if not ranks:
+        return None
+    return any(abs(a - b) <= 1 for b in ranks)
 
 
 def fit_flags(job, prefs: dict) -> list[str]:
@@ -205,17 +223,33 @@ def allowed_location(job) -> bool:
 _LEVEL_ORDER = ["intern", "junior", "mid", "senior", "lead", "manager", "director"]
 
 
-def level_mismatch(job_seniority: str, candidate_level: str, target_level: str = "") -> bool:
+def level_mismatch(job_seniority: str, candidate_level: str,
+                   target_level: str | list[str] = "") -> bool:
     """True if the job's level is unrealistic for the candidate — too senior
-    (a team-lead role for a mid, #4/#5) or far too junior. Respects an explicit
-    target level as the reference point."""
-    ref = target_level or candidate_level
+    (a team-lead role for a mid, #4/#5) or far too junior.
+
+    An explicit target wins over the resume-derived level, and several targets
+    may be given: the job only has to suit ONE of them, so asking for both mid
+    and senior widens the search instead of narrowing it.
+    """
+    if isinstance(target_level, str):
+        targets = [target_level] if target_level else []
+    else:
+        targets = [lv for lv in target_level if lv]
+    refs = targets or [candidate_level]
+
     try:
-        cand = _LEVEL_ORDER.index(ref)
         job = _LEVEL_ORDER.index(job_seniority)
     except ValueError:
         return False
-    return abs(job - cand) >= 2
+
+    for ref in refs:
+        try:
+            if abs(job - _LEVEL_ORDER.index(ref)) < 2:
+                return False   # suits at least one wanted level
+        except ValueError:
+            return False       # unknown reference -> do not filter on it
+    return True
 
 
 def profile_from_preferences(prefs: dict) -> dict:
@@ -232,10 +266,13 @@ def profile_from_preferences(prefs: dict) -> dict:
     roles = [r for r in prefs.get("roles", []) if r][:6]
     headline = roles[0] if roles else ""
     listed = ", ".join(roles)
+    wanted = get_target_levels(prefs)
     return {
         "name": "",
         "headline": headline,
-        "seniority": prefs.get("target_level") or "mid",
+        # with no resume to read a level from, the lowest wanted level is the
+        # honest assumption: claiming the highest would inflate the profile
+        "seniority": min(wanted, key=lambda lv: _LEVEL_RANK.get(lv, 2)) if wanted else "mid",
         "total_years_experience": 0,
         "skills": [],
         "skill_years": {},

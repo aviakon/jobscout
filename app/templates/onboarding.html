@@ -126,14 +126,16 @@
     </div>
 
     <div class="pref-group">
-      <label class="lbl">רמת משרה מבוקשת</label>
-      <div class="segmented" data-hidden="target_level">
-        {% set lvl = p.target_level or '' %}
-        {% for val, label in [('','ללא העדפה'),('junior','ג׳וניור'),('mid','מיד'),('senior','בכיר'),('lead','מוביל'),('manager','ניהול')] %}
-        <button type="button" class="{{ 'on' if lvl == val else '' }}" data-val="{{ val }}">{{ label }}</button>
+      <label class="lbl">רמת משרה מבוקשת <span class="muted small">(אפשר לבחור כמה)</span></label>
+      {% set lvls = p.target_levels if p.target_levels is not none else ([p.target_level] if p.target_level else []) %}
+      {% set lvls = lvls or [] %}
+      <div class="region-chips" id="level-group">
+        {% for val, label in [('junior','ג׳וניור'),('mid','מיד'),('senior','בכיר'),('lead','מוביל'),('manager','ניהול')] %}
+        <button type="button" class="{{ 'on' if val in lvls else '' }}" data-val="{{ val }}">{{ label }}</button>
         {% endfor %}
       </div>
-      <input type="hidden" name="target_level" value="{{ p.target_level or '' }}">
+      <input type="hidden" name="target_level" id="levels-hidden" value="{{ lvls|join(',') }}">
+      <p class="method-note">בלי בחירה נחפש בכל הרמות. בחירה של כמה רמות מרחיבה את החיפוש.</p>
     </div>
 
     <div class="pref-group">

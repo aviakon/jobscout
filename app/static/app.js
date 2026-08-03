@@ -430,6 +430,25 @@ if (toolbar) {
     syncRegions();
   }
 
+  // wanted seniority — multi-select, no "any" chip: selecting none means any
+  const levelGroup = document.getElementById("level-group");
+  const levelsHidden = document.getElementById("levels-hidden");
+  if (levelGroup && levelsHidden) {
+    const btns = Array.from(levelGroup.querySelectorAll("button"));
+    const syncLevels = () =>
+      (levelsHidden.value = btns
+        .filter((b) => b.classList.contains("on"))
+        .map((b) => b.dataset.val)
+        .join(","));
+    btns.forEach((btn) =>
+      btn.addEventListener("click", () => {
+        btn.classList.toggle("on");
+        syncLevels();
+      })
+    );
+    syncLevels();
+  }
+
   // roles chips
   const rolesBox = document.getElementById("roles-box");
   const roleInput = document.getElementById("role-input");

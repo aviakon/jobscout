@@ -544,3 +544,30 @@ body.landing .site-footer { margin-top: 0; border-top: 0; padding: 0.5rem 1rem; 
 .stats-table th { color: var(--muted); font-weight: 600; font-size: 0.82rem; }
 .stats-table tbody tr:last-child td { border-bottom: 0; }
 .sb-bots { color: var(--muted); font-size: 0.78rem; opacity: 0.75; margin-top: 0.15rem; }
+
+/* ============================ ADVERTISE FORM ============================ */
+.ad-pitch { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1rem; }
+.ad-pitch > div { background: var(--card2); border: 1px solid var(--border); border-radius: 12px; padding: 0.9rem 1rem; }
+.ap-ico { font-size: 1.4rem; display: block; margin-bottom: 0.35rem; }
+.ad-pitch b { display: block; margin-bottom: 0.2rem; }
+.ad-pitch p { margin: 0; color: var(--muted); font-size: 0.85rem; line-height: 1.5; }
+.req { color: var(--warn); }
+.pref-group input[type=text],
+.pref-group input[type=email],
+.pref-group input[type=tel] {
+  width: 100%; background: var(--card2); color: var(--text);
+  border: 1px solid var(--border); border-radius: 10px; padding: 0.6rem 0.8rem; font-size: 0.95rem;
+}
+.pref-group input:focus, .pref-group textarea:focus { outline: none; border-color: var(--accent); }
+#message { min-height: 110px; }
+/* honeypot: hidden from people but present in the DOM, since some bots skip
+   display:none. Clipped rather than pushed off-screen, which would widen the
+   page and give the whole form a horizontal scrollbar. */
+.hp {
+  position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; border: 0;
+  overflow: hidden; clip: rect(0 0 0 0); clip-path: inset(50%); white-space: nowrap;
+}
+
+/* inquiries table on the stats dashboard */
+.inq-msg { color: var(--muted); font-size: 0.85rem; }
+.inq-new { color: var(--accent2); font-weight: 700; }

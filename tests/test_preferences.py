@@ -13,8 +13,41 @@ def test_build_preferences_parses_fields():
     assert p["regions"] == ["center", "sharon"]
     assert p["employment_type"] == "full"
     assert p["remote"] == "remote"
-    assert p["target_level"] == "senior"
+    assert p["target_levels"] == ["senior"]
     assert p["roles"] == ["Backend", "Data"]
+
+
+def test_several_wanted_levels_are_kept():
+    p = _build_preferences("", "all", "any", "any", "mid,senior,lead", "")
+    assert p["target_levels"] == ["mid", "senior", "lead"]
+
+
+def test_no_wanted_level_means_no_constraint():
+    p = _build_preferences("", "all", "any", "any", "", "")
+    assert p["target_levels"] == []
+    assert prefs_mod.get_target_levels(p) == []
+
+
+def test_a_legacy_single_level_still_reads():
+    """Profiles saved before multi-select stored a bare string."""
+    assert prefs_mod.get_target_levels({"target_level": "senior"}) == ["senior"]
+    assert prefs_mod.get_target_levels({"target_levels": ["mid", "lead"]}) == ["mid", "lead"]
+
+
+def test_several_levels_widen_the_search_rather_than_narrow_it():
+    """A job only has to suit one of the wanted levels."""
+    # wanting mid or manager should accept a senior role (adjacent to mid)
+    assert prefs_mod.level_mismatch("senior", "mid", ["mid", "manager"]) is False
+    # ... and a lead role (adjacent to manager)
+    assert prefs_mod.level_mismatch("lead", "mid", ["mid", "manager"]) is False
+    # an intern role suits neither
+    assert prefs_mod.level_mismatch("intern", "mid", ["senior", "manager"]) is True
+
+
+def test_level_matches_accepts_a_list():
+    assert prefs_mod.level_matches("senior", ["junior", "senior"]) is True
+    assert prefs_mod.level_matches("intern", ["senior"]) is False
+    assert prefs_mod.level_matches("senior", []) is None
 
 
 def test_build_preferences_all_means_no_constraint():

@@ -20,7 +20,7 @@ from sqlalchemy.orm import Session
 
 from app import ads, analytics, config, db, ratelimit
 from app.db import get_session, init_db
-from app.models import Candidate, Match
+from app.models import AdInquiry, Candidate, Match
 from app.pipeline import run_for_candidate
 from app.resume.parser import (
     extract_text,
@@ -118,6 +118,68 @@ def healthz():
     }
 
 
+@app.get("/advertise", response_class=HTMLResponse)
+def advertise_form(request: Request, sent: int = 0):
+    return templates.TemplateResponse(request, "advertise.html", {"sent": bool(sent)})
+
+
+@app.post("/advertise")
+def advertise_submit(
+    request: Request,
+    session: Session = Depends(get_session),
+    company: str = Form(""),
+    contact_name: str = Form(""),
+    email: str = Form(""),
+    phone: str = Form(""),
+    message: str = Form(""),
+    website: str = Form(""),  # honeypot: real people never see or fill this
+):
+    if website.strip():  # a bot filled the hidden field
+        return RedirectResponse("/advertise?sent=1", status_code=303)
+    if _rate_limited(request, "advertise", limit=5, window=3600):
+        return templates.TemplateResponse(
+            request, "advertise.html",
+            {"error": "נשלחו יותר מדי פניות מהכתובת הזו. נסו שוב בעוד שעה."}, status_code=429)
+
+    company, contact_name = company.strip()[:200], contact_name.strip()[:200]
+    email, phone = email.strip()[:320], phone.strip()[:60]
+    if not company or not (email or phone):
+        return templates.TemplateResponse(
+            request, "advertise.html",
+            {"error": "צריך שם חברה ודרך אחת ליצור קשר: אימייל או טלפון.",
+             "form": {"company": company, "contact_name": contact_name,
+                      "email": email, "phone": phone, "message": message}},
+            status_code=400)
+
+    inquiry = AdInquiry(company=company, contact_name=contact_name, email=email,
+                        phone=phone, message=message.strip()[:4000])
+    session.add(inquiry)
+    session.commit()
+    analytics.record(session, kind="ad_inquiry", request=request, label=company[:120])
+    _notify_new_inquiry(inquiry)
+    return RedirectResponse("/advertise?sent=1", status_code=303)
+
+
+def _notify_new_inquiry(inquiry) -> None:
+    """Email the site owner if SMTP is set up. The inquiry is already saved, so
+    a failure here costs a notification, never the lead itself."""
+    if not config.email_configured():
+        return
+    try:
+        from app.emailer import send_email
+
+        rows = "".join(
+            f"<tr><td><b>{k}</b></td><td>{v}</td></tr>"
+            for k, v in (("חברה", inquiry.company), ("איש קשר", inquiry.contact_name),
+                         ("אימייל", inquiry.email), ("טלפון", inquiry.phone),
+                         ("הודעה", inquiry.message)) if v
+        )
+        send_email(f"פנייה חדשה לפרסום באתר: {inquiry.company}",
+                   f"<h2>פנייה חדשה לפרסום</h2><table>{rows}</table>")
+    except Exception as e:  # noqa: BLE001
+        logging.warning("could not email the new ad inquiry: %s", e)
+
+
 @app.get("/stats/{key}", response_class=HTMLResponse)
 def stats_dashboard(key: str, request: Request, session: Session = Depends(get_session)):
     """Private usage dashboard.
@@ -130,8 +192,12 @@ def stats_dashboard(key: str, request: Request, session: Session = Depends(get_s
     expected = config.stats_key()
     if not expected or not secrets.compare_digest(key, expected):
         raise HTTPException(404)
+    inquiries = session.scalars(
+        select(AdInquiry).order_by(desc(AdInquiry.created_at)).limit(50)
+    ).all()
     return templates.TemplateResponse(
-        request, "stats.html", {"s": analytics.summary(session), "key": key}
+        request, "stats.html",
+        {"s": analytics.summary(session), "key": key, "inquiries": inquiries},
     )
 
 
@@ -204,12 +270,14 @@ def _build_preferences(salary_min: str, regions: str, employment_type: str,
     region_list = [r.strip() for r in (regions or "").split(",") if r.strip()]
     if "all" in region_list:
         region_list = []  # "כל הארץ" => no region constraint
+    # target_level arrives comma separated now that several can be chosen
+    level_list = [lv.strip() for lv in (target_level or "").split(",") if lv.strip()]
     return {
         "salary_min": int(digits) if digits else None,
         "regions": region_list,
         "employment_type": employment_type or "any",
         "remote": remote or "any",
-        "target_level": target_level or "",
+        "target_levels": level_list,
         "roles": role_list,
     }
 

@@ -43,6 +43,32 @@
 </section>
 
 <section class="card">
+  <h2>✉️ פניות לפרסום {% if inquiries %}<span class="muted">({{ inquiries|length }})</span>{% endif %}</h2>
+  {% if inquiries %}
+  <table class="stats-table">
+    <thead><tr><th>מתי</th><th>חברה</th><th>איש קשר</th><th>יצירת קשר</th><th>הודעה</th></tr></thead>
+    <tbody>
+      {% for q in inquiries %}
+      <tr>
+        <td>{{ q.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+        <td><b>{{ q.company }}</b></td>
+        <td>{{ q.contact_name or '' }}</td>
+        <td dir="ltr">
+          {% if q.email %}<a href="mailto:{{ q.email }}">{{ q.email }}</a>{% endif %}
+          {% if q.phone %}<div>{{ q.phone }}</div>{% endif %}
+        </td>
+        <td class="inq-msg">{{ q.message or '' }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <p class="muted">עדיין לא הגיעו פניות. הטופס נמצא ב <a href="/advertise">/advertise</a>,
+    ומקושר מהמודעה בדף התוצאות ומהתחתית של כל עמוד.</p>
+  {% endif %}
+</section>
+
+<section class="card">
   <h2>📣 ביצועי מודעות</h2>
   {% if s.ads %}
   <table class="stats-table">
