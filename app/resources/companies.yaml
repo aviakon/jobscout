@@ -48,6 +48,13 @@ greenhouse:
   - { board: torq, company: "Torq" }
   - { board: tripactions, company: "Navan (TripActions)" }
   - { board: zoominfo, company: "ZoomInfo" }
+  # Probed 2026-08-03. Israel-based counts are noted because a board with no
+  # Israeli roles only costs fetch time: the pipeline drops foreign postings.
+  - { board: catonetworks, company: "Cato Networks" }          # 44 of 123 in Israel
+  - { board: aidocmedical, company: "Aidoc" }                  # 25 of 33 in Israel
+  - { board: via, company: "Via" }                             # 15 of 170 in Israel
+  - { board: transmitsecurity, company: "Transmit Security" }  # 10 of 14 in Israel
+  - { board: saltsecurity, company: "Salt Security" }          # small board, Israeli company
 
 lever:
   - { board: walkme, company: "WalkMe" }
